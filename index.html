@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de Orçamento CPlug</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="planos.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        [x-cloak] { display: none !important; }
+        .plan-card { transition: transform 0.2s, box-shadow 0.2s; }
+        .plan-card:hover { transform: translateY(-5px); }
+        .plan-card.selected {
+            border-color: #2563EB;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.5);
+            transform: translateY(-5px);
+        }
+        .summary-value {
+            font-weight: 600;
+            color: #1F2937;
+        }
+        .form-input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #D1D5DB;
+            border-radius: 0.5rem;
+            transition: ring 0.2s, border-color 0.2s;
+        }
+        .form-input:focus {
+            outline: none;
+            border-color: #2563EB;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.5);
+        }
+        .modal {
+            background-color: rgba(0, 0, 0, 0.5);
+            transition: opacity 0.3s ease;
+        }
+        .module-row:focus, .module-row.focused {
+            outline: none;
+            background-color: #EFF6FF;
+            box-shadow: 0 0 0 2px #2563EB;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800" x-data="quoteCalculator()" x-cloak>
+
+    <div x-show="!loggedIn" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-50">
+        <div class="bg-white p-8 rounded-2xl shadow-2xl w-full max-w-sm text-center" @keyup.enter="login()">
+            <h2 class="text-2xl font-bold text-gray-800">Acesso Restrito</h2>
+            <p class="text-gray-600 mt-2 mb-6">Por favor, insira a senha para continuar.</p>
+            <input type="password" x-model="password" x-ref="loginPasswordInput" placeholder="••••••••" class="w-full text-center text-lg p-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
+            <p x-show="loginError" class="text-red-500 text-sm mt-2">Por favor, insira uma senha.</p>
+            <button @click="login()" class="w-full bg-blue-600 text-white font-bold py-3 rounded-lg hover:bg-blue-700 transition mt-6">
+                Entrar
+            </button>
+        </div>
+    </div>
+    
+    <div x-show="showDiscountModal" class="modal fixed inset-0 flex items-center justify-center z-50" @click.away="showDiscountModal = false" @keydown.escape.window="showDiscountModal = false">
+        <div class="bg-white p-8 rounded-2xl shadow-2xl w-full max-w-md text-center" @click.stop>
+            <div x-show="!isDiscountAuthorized">
+                <h2 class="text-2xl font-bold text-gray-800">Autorizar Desconto</h2>
+                <p class="text-gray-600 mt-2 mb-6">Insira a senha para editar o desconto.</p>
+                <input type="password" x-model="discountPassword" x-ref="discountPasswordInput" @keydown.enter.prevent="authorizeDiscount()" placeholder="••••••••" class="form-input text-center">
+                <p x-show="discountPasswordError" class="text-red-500 text-sm mt-2">Por favor, insira uma senha.</p>
+                <button @click="authorizeDiscount()" class="w-full bg-blue-600 text-white font-bold py-2 rounded-lg hover:bg-blue-700 transition mt-4">Autorizar</button>
+            </div>
+             <div x-show="isDiscountAuthorized">
+                <h2 class="2xl font-bold text-gray-800">Editar Desconto e Cortesia</h2>
+                
+                <div class="p-3 bg-blue-50 border border-blue-200 text-blue-800 rounded-lg text-sm my-4">
+                    <p>O desconto recomendado é <strong>10%</strong>. (Máximo permitido: <strong>20%</strong>)</p>
+                </div>
+                <div class="space-y-4 my-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 text-left">Desconto Manual (%)</label>
+                        <input type="number" x-model.number="tempDiscountPercentage" x-ref="discountPercentageInput" placeholder="%" class="form-input text-center">
+                    </div>
+                </div>
+                
+                <div x-show="eligibleForCourtesy.length > 0" class="border-t pt-4 mt-6">
+                     <label class="block text-sm font-medium text-gray-700 text-left mb-2">Conceder 1 Módulo como Cortesia (até R$ 50,00)</label>
+                     <div class="max-h-40 overflow-y-auto space-y-2 pr-2 text-left">
+                         <label class="flex items-center p-2 rounded-lg hover:bg-gray-100">
+                             <input type="radio" name="courtesy" :value="null" x-model="courtesyModuleName">
+                             <span class="ml-2 text-sm text-gray-700 font-semibold">Nenhuma Cortesia</span>
+                         </label>
+                         <template x-for="mod in eligibleForCourtesy" :key="mod.name">
+                             <label class="flex items-center p-2 rounded-lg hover:bg-gray-100">
+                                 <input type="radio" name="courtesy" :value="mod.name" x-model="courtesyModuleName">
+                                 <span class="ml-2 text-sm text-gray-700" x-text="`${mod.name} (R$ ${mod.price.toFixed(2).replace('.',',')})`"></span>
+                              </label>
+                         </template>
+                     </div>
+                </div>
+                
+                <p x-show="discountRuleError" class="text-red-500 text-sm mt-2" x-text="discountRuleError"></p>
+                <button @click="applyManualDiscount()" class="w-full bg-green-600 text-white font-bold py-2 rounded-lg hover:bg-green-700 transition mt-4">Salvar Alterações</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Autorizar edição da Data de Fechamento -->
+    <div x-show="showClosingDateModal" class="modal fixed inset-0 flex items-center justify-center z-50" @click.away="showClosingDateModal = false" @keydown.escape.window="showClosingDateModal = false">
+        <div class="bg-white p-8 rounded-2xl shadow-2xl w-full max-w-md text-center" @click.stop>
+            <div x-show="!isClosingDateAuthorized">
+                <h2 class="text-2xl font-bold text-gray-800">Autorizar Data de Fechamento</h2>
+                <p class="text-gray-600 mt-2 mb-6">Insira a senha para editar a data.</p>
+                <input type="password" x-model="closingDatePassword" x-ref="closingDatePasswordInput" @keydown.enter.prevent="authorizeClosingDate()" placeholder="••••••••" class="form-input text-center">
+                <p x-show="closingDatePasswordError" class="text-red-500 text-sm mt-2">Por favor, insira uma senha.</p>
+                <button @click="authorizeClosingDate()" class="w-full bg-blue-600 text-white font-bold py-2 rounded-lg hover:bg-blue-700 transition mt-4">Autorizar</button>
+            </div>
+            <div x-show="isClosingDateAuthorized">
+                <h2 class="2xl font-bold text-gray-800">Editar Data de Fechamento</h2>
+                <div class="space-y-4 my-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 text-left">Nova Data</label>
+                        <input type="date" x-model="tempClosingDate" class="form-input text-center">
+                    </div>
+                </div>
+                <button @click="applyClosingDate()" class="w-full bg-green-600 text-white font-bold py-2 rounded-lg hover:bg-green-700 transition mt-4">Salvar</button>
+            </div>
+        </div>
+    </div>
+
+    <div x-show="loggedIn" class="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
+        <header class="text-center mb-12">
+            <h1 class="text-4xl md:text-5xl font-extrabold text-gray-900">Orçamento CPlug</h1>
+            <p class="text-lg text-gray-600 mt-2">Selecione um segmento, um plano, personalize os módulos e calcule o valor final.</p>
+        </header>
+
+        <section id="plan-selection" class="mb-12">
+            <h2 class="text-2xl font-bold mb-6 text-center">1. Escolha o Segmento e o Plano Base</h2>
+            
+            <div class="flex justify-center mb-8">
+                <div class="flex space-x-2 bg-gray-200 p-1 rounded-xl">
+                    <button @click="setSegment('food')"
+                            :class="{'bg-white text-blue-600 shadow': selectedSegment === 'food', 'text-gray-600': selectedSegment !== 'food'}"
+                            class="py-2 px-6 rounded-lg font-semibold transition-all duration-300">
+                        Food Service
+                    </button>
+                    <button @click="setSegment('varejo')"
+                            :class="{'bg-white text-blue-600 shadow': selectedSegment === 'varejo', 'text-gray-600': selectedSegment !== 'varejo'}"
+                            class="py-2 px-6 rounded-lg font-semibold transition-all duration-300">
+                        Varejo
+                    </button>
+                    <button @click="setSegment('outros')"
+                            :class="{'bg-white text-blue-600 shadow': selectedSegment === 'outros', 'text-gray-600': selectedSegment !== 'outros'}"
+                            class="py-2 px-6 rounded-lg font-semibold transition-all duration-300">
+                        Outros
+                    </button>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 md:items-stretch">
+                <template x-for="(plan, key) in planData[selectedSegment]" :key="key">
+                    <div @click="selectPlan(key)" class="plan-card cursor-pointer bg-white p-8 rounded-2xl shadow-lg border-2 border-transparent flex flex-col" :class="{'selected': selectedPlanKey === key}">
+                        <h3 class="text-3xl font-bold text-gray-900" x-text="plan.name"></h3>
+                        <p class="text-gray-500 mt-2 mb-6 border-b pb-4">Módulos inclusos:</p>
+                        <ul class="space-y-2 text-gray-600 flex-grow">
+                            <template x-for="item in plan.fixedModules" :key="item">
+                                <li class="flex items-start">
+                                    <svg class="w-5 h-5 text-green-500 mr-2 flex-shrink-0 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                    <span x-text="item"></span>
+                                </li>
+                            </template>
+                        </ul>
+                    </div>
+                </template>
+            </div>
+        </section>
+
+        <section x-if="selectedPlan" x-transition class="grid grid-cols-1 lg:grid-cols-3 gap-12">
+            
+            <div class="lg:col-span-2">
+                <h2 class="text-2xl font-bold mb-6">2. Personalize seu Plano</h2>
+                <div class="bg-white p-8 rounded-2xl shadow-lg border border-gray-200 space-y-8">
+                    <div class="relative">
+                        <input type="text" x-model="searchQuery" x-ref="searchInput" @keydown.down.prevent="focusFirstModule()" @keydown.enter.prevent="selectFirstFilteredModule()" placeholder="Pesquisar módulo..." class="form-input !p-4 !pl-10">
+                        <svg class="w-6 h-6 text-gray-400 absolute left-2.5 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                    </div>
+                    <div x-show="!searchQuery">
+                        <h3 class="text-xl font-semibold mb-4 border-b pb-2">Módulos Adicionais</h3>
+                        <div class="space-y-4">
+                            <template x-if="selectedPlan.additionalUsers.max > 0">
+                                <div class="flex items-center justify-between">
+                                    <label>Usuários Adicionais (Base: <span x-text="selectedPlan.baseUsers"></span>, Máx. Adicional: <span x-text="selectedPlan.additionalUsers.max === Infinity ? '∞' : selectedPlan.additionalUsers.max"></span>)</label>
+                                    <div class="flex items-center space-x-3">
+                                        <span class="text-sm font-semibold text-blue-600">+ R$ <span x-text="selectedPlan.additionalUsers.price.toFixed(2).replace('.', ',')"></span>/cada</span>
+                                        <input type="number" x-model.number="selectedPlan.additionalUsers.count" min="0" :max="selectedPlan.additionalUsers.max === Infinity ? null : selectedPlan.additionalUsers.max" class="w-20 text-center p-2 border rounded-lg">
+                                    </div>
+                                </div>
+                            </template>
+                            <template x-if="selectedPlan.additionalPdvs.max > 0">
+                                <div class="flex items-center justify-between">
+                                     <label>PDVs Adicionais (Base: <span x-text="selectedPlan.basePdvs"></span>, Máx. Adicional: <span x-text="selectedPlan.additionalPdvs.max === Infinity ? '∞' : selectedPlan.additionalPdvs.max"></span>)</label>
+                                    <div class="flex items-center space-x-3">
+                                        <span class="text-sm font-semibold text-blue-600">+ R$ <span x-text="selectedPlan.additionalPdvs.price.toFixed(2).replace('.', ',')"></span>/cada</span>
+                                        <input type="number" x-model.number="selectedPlan.additionalPdvs.count" min="0" :max="selectedPlan.additionalPdvs.max === Infinity ? null : selectedPlan.additionalPdvs.max" class="w-20 text-center p-2 border rounded-lg">
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-semibold mb-4 border-b pb-2" x-show="!searchQuery">Módulos Opcionais</h3>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-4">
+                            <template x-for="(mod, index) in filteredOptionalModules" :key="mod.name">
+                                <div :id="'module-' + index" tabindex="0" @keydown.enter.prevent="toggleModule(mod)" @click="toggleModule(mod)" class="module-row flex items-center justify-between p-3 rounded-lg hover:bg-gray-100 transition cursor-pointer" :class="{'focused': activeModuleIndex === index, 'bg-green-50': mod.isPromo}">
+                                    <span class="mr-4 flex items-center">
+                                        <span x-text="mod.name"></span>
+                                    </span>
+                                    <div @click.stop class="flex items-center space-x-3">
+                                        <span class="font-semibold text-gray-600 text-sm">R$ <span x-text="mod.price.toFixed(2).replace('.', ',')"></span></span>
+                                        <template x-if="mod.quantifiable">
+                                            <input type="number" x-model.number="mod.count" min="0" :max="mod.max === Infinity ? null : mod.max" class="w-20 text-center p-2 border rounded-lg">
+                                        </template>
+                                        <template x-if="!mod.quantifiable">
+                                            <input type="checkbox" x-model="mod.selected" :disabled="isModuleDisabled(mod)" class="h-5 w-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500 ml-4">
+                                        </template>
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="lg:col-span-1">
+                 <h2 class="text-2xl font-bold mb-6">3. Resumo do Orçamento</h2>
+                <div class="bg-white p-8 rounded-2xl shadow-lg border border-gray-200 sticky top-8">
+                    <h3 class="text-2xl font-bold text-center mb-6" x-text="selectedPlan.name"></h3>
+                    <div class="space-y-4 text-lg">
+                        <div class="flex justify-between"><span>Plano Base</span> <span class="summary-value">R$ <span x-text="summary.base.toFixed(2).replace('.', ',')"></span></span></div>
+                        <div x-show="summary.addons > 0" class="flex justify-between" x-transition><span>Módulos Adicionais</span> <span class="summary-value">R$ <span x-text="summary.addons.toFixed(2).replace('.', ',')"></span></span></div>
+                        <div x-show="summary.optionals > 0" class="flex justify-between" x-transition><span>Módulos Opcionais</span> <span class="summary-value">R$ <span x-text="summary.optionals.toFixed(2).replace('.', ',')"></span></span></div>
+                        <hr>
+                        <div class="flex justify-between font-bold text-xl"><span>Subtotal</span> <span class="summary-value">R$ <span x-text="summary.subtotal.toFixed(2).replace('.', ',')"></span></span></div>
+                        
+                        <div x-show="courtesyModuleName" class="flex justify-between text-blue-600" x-transition>
+                            <span>Cortesia: <span x-text="courtesyModuleName"></span></span>
+                            <span>- R$ <span x-text="summary.courtesyValue.toFixed(2).replace('.',',')"></span></span>
+                        </div>
+                        
+                        <div class="pt-4 border-t">
+                            <label for="closing-date" class="block text-sm font-medium text-gray-700 mb-1">Data de Fechamento</label>
+                            <div class="relative">
+                                <input type="text" id="closing-date" :value="new Date(closingDate + 'T00:00:00').toLocaleDateString('pt-BR')" @click="openClosingDateModal()" readonly class="form-input w-full cursor-pointer">
+                                <button type="button" @click="openClosingDateModal()" class="absolute right-2 top-1/2 -translate-y-1/2 text-blue-600 text-sm">(Editar)</button>
+                            </div>
+                        </div>
+
+                         <div class="flex justify-between text-red-600">
+                            <div class="flex items-center">
+                                <span>Desconto (<span x-text="manualDiscountPercentage.toFixed(2).replace('.',',')"></span>%)</span>
+                                <button @click="openDiscountModal()" class="ml-2 text-xs text-blue-600 hover:underline">(Editar)</button>
+                            </div>
+                            <span>- R$ <span x-text="summary.calculatedDiscountAmount.toFixed(2).replace('.', ',')"></span></span>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-8 pt-6 border-t-2 border-dashed">
+                        <div class="flex justify-between items-center text-2xl font-extrabold text-gray-900">
+                            <span>TOTAL</span>
+                            <span class="text-3xl text-blue-600">R$ <span x-text="summary.finalTotal.toFixed(2).replace('.', ',')"></span></span>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-6" x-show="summary.finalTotal > 0 && summary.finalTotal < summary.subtotal">
+                        <button @click="showLeadForm = !showLeadForm" class="w-full bg-orange-500 text-white font-bold py-3 rounded-lg hover:bg-orange-600 transition text-lg shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
+                            Garantir Condição Especial
+                        </button>
+                        <div x-show="showLeadForm" x-transition class="mt-6 space-y-4">
+                            <div x-show="!leadCaptureSuccess">
+                                <div class="p-4 bg-gray-100 border rounded-lg text-center mb-4">
+                                    <p class="text-sm text-gray-700">Com esta condição, a economia em 12 meses será de:</p>
+                                    <p class="2xl font-bold text-green-600">R$ <span x-text="((summary.subtotal - summary.finalTotal) * 12).toFixed(2).replace('.',',')"></span></p>
+                                    <p class="text-xs text-gray-500 mt-2 flex items-center justify-center">
+                                        <svg class="w-4 h-4 mr-1 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                        Compromisso de parceria de 12 meses para garantir seus benefícios.
+                                    </p>
+                                </div>
+                                <input type="text" x-model="clientName" x-ref="clientNameInput" placeholder="Nome do Cliente" class="form-input" @input="leadFormError = ''">
+                                <input type="text" x-model="clientCPF" placeholder="CPF" class="form-input mt-4" @input="leadFormError = ''">
+                                <input type="text" x-model="clientCNPJ" placeholder="CNPJ (opcional)" class="form-input mt-4" @input="leadFormError = ''">
+                                <textarea x-model="clientObservation" placeholder="Observações (opcional)" class="form-input mt-4" rows="3"></textarea>
+                                <p x-show="leadFormError" class="text-red-500 text-sm mt-2" x-text="leadFormError"></p>
+                                <button @click="submitLead()" class="w-full bg-blue-600 text-white font-bold py-2 rounded-lg hover:bg-blue-700 transition mt-4">
+                                    Confirmar Dados e Gerar Cupom
+                                </button>
+                            </div>
+                            <div x-show="leadCaptureSuccess" class="p-4 bg-green-100 text-green-800 rounded-lg text-center space-y-3">
+                                <p class="font-bold text-xl">Condição garantida!</p>
+                                <div class="text-left mt-4 border-t border-green-200 pt-3 space-y-1">
+                                    <p><strong>Cliente:</strong> <span x-text="clientName"></span></p>
+                                    <p><strong>Cupom:</strong> <code class="font-mono bg-gray-200 text-gray-900 px-2 py-1 rounded-md" x-text="generatedCouponCode"></code></p>
+                                    <p><strong>Economia Anual:</strong> <strong class="text-green-900">R$ <span x-text="annualSavings.toFixed(2).replace('.',',')"></span></strong></p>
+                                    <div class="text-red-600"><strong>Expira em:</strong> <span x-text="countdownText"></span></div>
+                                </div>
+                                <button @click="generatePDF()" class="w-full mt-4 bg-gray-700 text-white font-bold py-2 rounded-lg hover:bg-gray-800 transition">
+                                    Gerar Proposta em PDF
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+</body>
+</html>
