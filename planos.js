@@ -24,7 +24,7 @@ function quoteCalculator() {
                     optionalModules: [
                         // NOTE: Delivery module isn't in this plan, so dependencies won't work here. Added a placeholder 'Delivery' module for dependency logic.
                         { name: 'Delivery', price: 30.00, quantifiable: false, selected: false }, // Placeholder for dependency
-                        { name: 'Hub de Delivery', price: 79.90, quantifiable: false, selected: false, requires: ['Delivery'] },
+                        { name: 'Hub de Delivery', price: 79.00, quantifiable: false, selected: false, requires: ['Delivery'] },
                         { name: 'Delivery Direto Básico', price: 99.00, quantifiable: false, selected: false, requires: ['Hub de Delivery'] },
                         { name: 'Delivery Direto Profissional', price: 200.00, quantifiable: false, selected: false, requires: ['Hub de Delivery'] },
                         { name: 'Delivery Direto VIP', price: 300.00, quantifiable: false, selected: false, requires: ['Hub de Delivery'] },
@@ -90,7 +90,7 @@ function quoteCalculator() {
                     optionalModules: [
                         // Adicionando módulos de delivery para a lógica de dependência funcionar
                         { name: 'Delivery', price: 30.00, quantifiable: false, selected: false },
-                        { name: 'Hub de Delivery', price: 79.90, quantifiable: false, selected: false, requires: ['Delivery'] },
+                        { name: 'Hub de Delivery', price: 79.00, quantifiable: false, selected: false, requires: ['Delivery'] },
                         { name: 'TEF', price: 99.90, quantifiable: true, count: 0 }, { name: 'Importação de XML', price: 29.00, quantifiable: false, selected: false },
                         { name: 'Estoque em Grade', price: 40.00, quantifiable: false, selected: false }, { name: 'Conciliação Bancária', price: 50.00, quantifiable: false, selected: false },
                         { name: 'Contratos de cartões e outros', price: 50.00, quantifiable: false, selected: false }, { name: 'Ordem de Serviço', price: 20.00, quantifiable: false, selected: false },
