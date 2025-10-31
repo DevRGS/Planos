@@ -9,6 +9,7 @@ function quoteCalculator() {
         courtesyModuleName: null,
         showLeadForm: false, leadCaptureSuccess: false, clientName: '', clientCPF: '', clientCNPJ: '', clientObservation: '', leadFormError: '',
         generatedCouponCode: '', annualSavings: 0, countdownTimer: null, countdownText: '',
+        selectedYears: 1,
 
         noDiscountModules: new Set([
             "TEF", "Autoatendimento", "Smart TEF", "Programa de Fidelidade",
