@@ -1,43 +1,49 @@
 function quoteCalculator() {
     return {
         // --- Properties ---
-        loggedIn: false, password: '', loginError: false, selectedSegment: 'food', selectedPlanKey: null, closingDate: (()=>{ const d=new Date(); d.setDate(d.getDate()+1); return d.toISOString().split('T')[0]; })(), searchQuery: '', activeModuleIndex: -1,
+        loggedIn: false, password: '', loginError: false, selectedSegment: 'food', selectedPlanKey: null, closingDate: (() => { const d = new Date(); d.setDate(d.getDate() + 1); return d.toISOString().split('T')[0]; })(), searchQuery: '', activeModuleIndex: -1,
         showDiscountModal: false, isDiscountAuthorized: false, discountPassword: '', discountPasswordError: false, 
         // Proteção da Data de Fechamento
         showClosingDateModal: false, isClosingDateAuthorized: false, closingDatePassword: '', closingDatePasswordError: false, tempClosingDate: '',
         manualDiscountPercentage: 10, tempDiscountPercentage: 10, discountRuleError: '',
+        // Código especial para desconto acima de 20%
+        showSpecialCodeModal: false, specialCode: '', specialCodeError: false,
         courtesyModuleName: null,
         showLeadForm: false, leadCaptureSuccess: false, clientName: '', clientCPF: '', clientCNPJ: '', clientObservation: '', leadFormError: '',
         generatedCouponCode: '', annualSavings: 0, countdownTimer: null, countdownText: '',
         selectedYears: 1,
 
         noDiscountModules: new Set([
-            "TEF", "Autoatendimento", "Smart TEF", "Programa de Fidelidade",
-            "Delivery Direto Profissional", "Delivery Direto VIP", "Hub de Delivery", "Integração API", "Integração TAP"
+    // Defina aqui módulos que você não quer que recebam desconto
         ]),
 
-        planData: {
+        planData: typeof PLAN_DATA !== 'undefined' ? PLAN_DATA : (() => {
+            // Fallback data se PLAN_DATA não estiver disponível
+            return {
             food: {
                 pdv: {
                     name: 'Plano PDV', basePrice: 221.11, baseUsers: 2, basePdvs: 1,
                     fixedModules: ['2x Usuários', '1x PDV - Frente de Caixa', '30 Notas Fiscais', 'Suporte Técnico - Via chamados', 'Relatório Básico'],
                     additionalUsers: { count: 0, price: 19.90, max: 1 }, additionalPdvs: { count: 0, price: 0, max: 0 },
                     optionalModules: [
-                        // NOTE: Delivery module isn't in this plan, so dependencies won't work here. Added a placeholder 'Delivery' module for dependency logic.
-                        { name: 'Delivery', price: 30.00, quantifiable: false, selected: false }, // Placeholder for dependency
+                        { name: 'Delivery', price: 30.00, quantifiable: false, selected: false },
                         { name: 'Hub de Delivery', price: 79.00, quantifiable: false, selected: false, requires: ['Delivery'] },
                         { name: 'Delivery Direto Básico', price: 99.00, quantifiable: false, selected: false, requires: ['Hub de Delivery'] },
                         { name: 'Delivery Direto Profissional', price: 200.00, quantifiable: false, selected: false, requires: ['Hub de Delivery'] },
                         { name: 'Delivery Direto VIP', price: 300.00, quantifiable: false, selected: false, requires: ['Hub de Delivery'] },
-                        { name: 'TEF', price: 99.90, quantifiable: true, count: 0 }, { name: 'Importação de XML', price: 29.00, quantifiable: false, selected: false },
-                        { name: 'Autoatendimento', price: 299.00, quantifiable: true, count: 0 }, { name: 'Contratos de cartões', price: 50.00, quantifiable: false, selected: false },
-                        { name: 'Ordem de Serviço', price: 20.00, quantifiable: false, selected: false }, { name: 'Estoque em Grade', price: 40.00, quantifiable: false, selected: false },
+                        { name: 'TEF', price: 99.90, quantifiable: true, count: 0 },
+                        { name: 'Importação de XML', price: 29.00, quantifiable: false, selected: false },
+                        { name: 'Autoatendimento', price: 299.00, quantifiable: true, count: 0 },
+                        { name: 'Contratos de cartões', price: 50.00, quantifiable: false, selected: false },
+                        { name: 'Ordem de Serviço', price: 20.00, quantifiable: false, selected: false },
+                        { name: 'Estoque em Grade', price: 40.00, quantifiable: false, selected: false },
                         { name: 'Conciliação Bancária', price: 50.00, quantifiable: false, selected: false },
+                        { name: 'Contratos de cartões e outros', price: 50.00, quantifiable: false, selected: false },
                     ]
                 },
                 gestao: {
                     name: 'Plano Gestão', basePrice: 332.22, baseUsers: 3, basePdvs: 1, // Alterado basePdvs para 1
-                    fixedModules: ['3x Usuários', '1x PDV - Frente de Caixa','Notas Fiscais Ilimitadas', 'Importação de XML', 'Painel Senha TV', 'Estoque em Grade', 'Financeiro, Estoque e Relatórios', 'Suporte Técnico - Via Chat', 'Delivery', 'Relatório KDS', 'Produção', 'Controle de Mesas'], // Alterado para 1x PDV
+                    fixedModules: ['3x Usuários', '1x PDV - Frente de Caixa', 'Notas Fiscais Ilimitadas', 'Importação de XML', 'Painel Senha TV', 'Estoque em Grade', 'Financeiro, Estoque e Relatórios', 'Suporte Técnico - Via Chat', 'Delivery', 'Relatório KDS', 'Produção', 'Controle de Mesas'], // Alterado para 1x PDV
                     additionalUsers: { count: 0, price: 19.90, max: 2 }, additionalPdvs: { count: 0, price: 59.90, max: 2 }, // Alterado max para 2
                     optionalModules: [
                         { name: 'Facilita NFE', price: 99.00, quantifiable: false, selected: false }, 
@@ -64,6 +70,7 @@ function quoteCalculator() {
                         { name: 'Smart TEF', price: 49.90, quantifiable: true, count: 0 }, 
                         { name: 'Autoatendimento', price: 299.00, quantifiable: true, count: 0 },
                         { name: 'Suporte Técnico - Estendido', price: 99.00, quantifiable: false, selected: false },
+                        { name: 'Programa de Fidelidade', price: 299.90, setupCost: 1000.00, quantifiable: false, selected: false },
                     ]
                 },
                 performance: {
@@ -75,7 +82,7 @@ function quoteCalculator() {
                         { name: 'Delivery Direto Básico', price: 99.00, quantifiable: false, selected: false, requires: ['Hub de Delivery'] }, 
                         { name: 'Delivery Direto Profissional', price: 200.00, quantifiable: false, selected: false, requires: ['Hub de Delivery'] },
                         { name: 'Delivery Direto VIP', price: 300.00, quantifiable: false, selected: false, requires: ['Hub de Delivery'] },
-                        { name: 'TEF', price: 99.90, quantifiable: true, count: 0 }, { name: 'Programa de Fidelidade', price: 299.90, quantifiable: false, selected: false },
+                        { name: 'TEF', price: 99.90, quantifiable: true, count: 0 }, { name: 'Programa de Fidelidade', price: 299.90, setupCost: 1000.00, quantifiable: false, selected: false },
                         { name: 'Integração TAP', price: 299.00, quantifiable: false, selected: false }, { name: 'Integração API', price: 199.90, quantifiable: false, selected: false },
                         { name: 'Business Intelligence (BI)', price: 99.00, quantifiable: false, selected: false }, { name: 'Backup Realtime', price: 99.00, quantifiable: false, selected: false },
                         { name: 'Cardápio digital', price: 99.00, quantifiable: false, selected: false }, { name: 'Smart Menu', price: 99.00, quantifiable: false, selected: false },
@@ -114,7 +121,7 @@ function quoteCalculator() {
                         { name: 'Integração API', price: 199.90, quantifiable: false, selected: false },
                         { name: 'Suporte Técnico - Estendido', price: 99.00, quantifiable: false, selected: false }, 
                         { name: 'Conciliação Bancária', price: 50.00, quantifiable: false, selected: false },
-                        { name: 'Programa de Fidelidade', price: 299.90, quantifiable: false, selected: false },
+                        { name: 'Programa de Fidelidade', price: 299.90, setupCost: 1000.00, quantifiable: false, selected: false },
                         { name: 'Painel Senha', price: 49.00, quantifiable: false, selected: false }, 
                         { name: 'Relatório Dinâmico', price: 50.00, quantifiable: false, selected: false }, 
                         { name: 'Backup Realtime', price: 199.00, quantifiable: false, selected: false },
@@ -129,19 +136,28 @@ function quoteCalculator() {
                 },
                 performance: {
                     name: 'Plano Performance', basePrice: 443.33, baseUsers: 5, basePdvs: 2,
-                    fixedModules: ['5x Usuários', '2x PDV - Frente de Caixa', '3x Smart TEF', 'Produção', 'Promoções', 'Notas Fiscais Ilimitadas', 'Importação de XML', 'Ordem de Serviço', 'App Gestão CPlug', 'Painel de Senha TV', 'Painel de Senha Mobile', 'Controle de Mesas', 'Estoque em Grade', 'Marketing', 'Relatórios, Financeiro e Estoque', 'Relatório Dinâmico', 'Atualização em Tempo Real', 'Facilita NFE', 'Conciliação Bancária', 'Contratos de cartões e outros', 'Suporte Técnico Completo (Todos os canais)'],
+                    fixedModules: ['5x Usuários', '2x PDV - Frente de Caixa', '3x Smart TEF', 'Produção', 'Promoções', 'Notas Fiscais Ilimitadas', 'Importação de XML', 'Ordem de Serviço', 'App Gestão CPlug', 'Painel de Senha TV', 'Painel de Senha Mobile', 'Controle de Mesas', 'Delivery','Estoque em Grade', 'Marketing', 'Relatórios, Financeiro e Estoque', 'Relatório Dinâmico', 'Atualização em Tempo Real', 'Facilita NFE', 'Conciliação Bancária', 'Contratos de cartões e outros', 'Suporte Técnico Completo (Todos os canais)'],
                     additionalUsers: { count: 0, price: 19.90, max: 5 }, 
                     additionalPdvs: { count: 0, price: 59.90, max: 5 },
                     optionalModules: [
                         // Adicionando módulos de delivery para a lógica de dependência funcionar
-                        { name: 'Delivery', price: 30.00, quantifiable: false, selected: false }, // Adicionado para consistência
                         { name: 'Hub de Delivery', price: 79.90, quantifiable: false, selected: false, requires: ['Delivery'] },
+                        { name: 'Delivery Direto Básico', price: 99.00, quantifiable: false, selected: false, requires: ['Hub de Delivery'] },
+                        { name: 'Delivery Direto Profissional', price: 200.00, quantifiable: false, selected: false, requires: ['Hub de Delivery'] },
+                        { name: 'Delivery Direto VIP', price: 300.00, quantifiable: false, selected: false, requires: ['Hub de Delivery'] },
                         { name: 'Integração API', price: 199.90, quantifiable: false, selected: false }, 
                         { name: 'Integração TAP', price: 299.00, quantifiable: false, selected: false },
                         { name: 'Backup Realtime', price: 99.00, quantifiable: false, selected: false }, 
                         { name: 'Business Intelligence (BI)', price: 99.00, quantifiable: false, selected: false },
-                        { name: 'Programa de Fidelidade', price: 299.90, quantifiable: false, selected: false }, 
+                        { name: 'Programa de Fidelidade', price: 299.90, setupCost: 1000.00, quantifiable: false, selected: false },
                         { name: 'Cardápio digital', price: 99.00, quantifiable: false, selected: false },
+                        { name: 'Smart Menu', price: 99.00, quantifiable: false, selected: false },
+                        { name: 'E-Mail Profissional', price: 19.90, quantifiable: false, selected: false },
+                        { name: 'Entrega fácil iFood', price: 49.90, quantifiable: false, selected: false },
+                        { name: 'Painel Multilojas', price: 199.90, quantifiable: false, selected: false },
+                        { name: 'API DD', price: 49.90, quantifiable: false, selected: false },
+                        { name: 'Central Telefônica', price: 399.90, setupCost: 500.00, quantifiable: false, selected: false },
+
                     ]
                 }
             },
@@ -177,7 +193,8 @@ function quoteCalculator() {
                     ]
                 }
             }
-        },
+            };
+        })(),
         
         // --- Computed Properties ---
         get eligibleForCourtesy() {
@@ -194,10 +211,19 @@ function quoteCalculator() {
         },
 
         get summary() {
-            if (!this.selectedPlan) return { base: 0, addons: 0, optionals: 0, subtotal: 0, courtesyValue: 0, calculatedDiscountAmount: 0, totalReduction: 0, finalTotal: 0, effectivePercentage: 0 };
+            if (!this.selectedPlan) return { base: 0, addons: 0, optionals: 0, setupCost: 0, subtotal: 0, courtesyValue: 0, calculatedDiscountAmount: 0, totalReduction: 0, finalTotal: 0, effectivePercentage: 0 };
             const base = this.selectedPlan.basePrice;
             const addons = (this.selectedPlan.additionalUsers.count * this.selectedPlan.additionalUsers.price) + (this.selectedPlan.additionalPdvs.count * this.selectedPlan.additionalPdvs.price);
             const optionals = this.selectedPlan.optionalModules.reduce((total, mod) => total + (mod.quantifiable ? mod.count * mod.price : (mod.selected ? mod.price : 0)), 0);
+            
+            // Calcula custo de setup (apenas primeiro mês)
+            const setupCost = this.selectedPlan.optionalModules.reduce((total, mod) => {
+                if ((mod.selected || (mod.quantifiable && mod.count > 0)) && mod.setupCost) {
+                    return total + mod.setupCost;
+                }
+                return total;
+            }, 0);
+            
             const subtotal = base + addons + optionals;
             
             const courtesyValue = this.eligibleForCourtesy.find(m => m.name === this.courtesyModuleName)?.price || 0;
@@ -222,6 +248,7 @@ function quoteCalculator() {
                 base, 
                 addons, 
                 optionals, 
+                setupCost,
                 subtotal, 
                 courtesyValue, 
                 calculatedDiscountAmount, 
@@ -359,12 +386,28 @@ function quoteCalculator() {
         applyManualDiscount() {
             this.discountRuleError = '';
             if (this.tempDiscountPercentage > 20) {
-                this.discountRuleError = 'O desconto máximo permitido é de 20%.';
+                this.discountRuleError = '🚫';
+                // Não mostra o modal automaticamente, apenas o botão no template
                 return;
             }
             if (this.tempDiscountPercentage < 0) this.tempDiscountPercentage = 0;
             this.manualDiscountPercentage = this.tempDiscountPercentage;
             this.showDiscountModal = false;
+            this.showSpecialCodeModal = false;
+        },
+
+        validateSpecialCode() {
+            this.specialCodeError = false;
+            if (!this.specialCode || !this.specialCode.toUpperCase().includes('C')) {
+                this.specialCodeError = true;
+                return false;
+            }
+            // Código válido, permite aplicar desconto acima de 20%
+            this.manualDiscountPercentage = this.tempDiscountPercentage;
+            this.showDiscountModal = false;
+            this.showSpecialCodeModal = false;
+            this.specialCode = '';
+            return true;
         },
 
         // Modal de autorização e edição da Data de Fechamento
@@ -428,19 +471,179 @@ function quoteCalculator() {
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
 
-            // --- Configurações de Design ---
+            // --- Estrutura de Dados: Equipamentos Homologados ---
+            const equipamentosHomologados = {
+                impressorasTermicas: {
+                    titulo: 'Impressoras Térmicas',
+                    recomendados: [
+                        'Epson TM T-20',
+                        'Elgin i9',
+                        'Bematech MP4200TH'
+                    ],
+                    naoRecomendados: [
+                        'EpsonTMT-20 (USB)',
+                        'EpsonTMT-81 (USB)',
+                        'EpsonTMT-88 (USB)',
+                        'Elgini9 (USB)',
+                        'Elgini7 (USB)',
+                        'Bematech MP 4200 TH (USB)',
+                        'Bematech MP 100S (USB)',
+                        'Bematech MP 4000 TH (USB)',
+                        'Bematech MP 2500 TH (USB)',
+                        'Bematech LR 2000 (USB)',
+                        'CIS PR 1800',
+                        'Thermal Receipt Printer POS - 8330'
+                    ]
+                },
+                balancas: {
+                    titulo: 'Balanças',
+                    recomendados: [
+                        'Toledo Prix 3 Light (Comunicação com sistema sem impressão de etiqueta)',
+                        'Toledo Prix 3 Plus (Comunicação com sistema sem impressão de etiqueta)',
+                        'Toledo Prix 3 Fit (Comunicação com sistema sem impressão de etiqueta)',
+                        'Toledo Prix 2187 (Comunicação com sistema sem impressão de etiqueta)',
+                        'Toledo Prix 4 (Imprime etiquetas - requer Relatório Dinâmico)',
+                        'Toledo Prix 5 (Imprime etiquetas - requer Relatório Dinâmico)',
+                        'Urano: Todos modelos (Protocolo PRT-3)',
+                        'Filizola Platina 3/4/5 (Imprime etiquetas - requer Relatório Dinâmico)',
+                        'Balanças Elgin Linha DP - todos os modelos'
+                    ]
+                },
+                computadores: {
+                    titulo: 'Computadores - Requisitos Mínimos',
+                    itens: [
+                        'Windows 10 e 11',
+                        'Memória RAM: no mínimo 4GB',
+                        'Espaço mínimo de HD/SSD: 250 GB',
+                        'Processador mínimo: i3'
+                    ]
+                },
+                celulares: {
+                    titulo: 'Celulares (Recomendado)',
+                    itens: [
+                        'Sistema operacional: Android',
+                        'Tamanho: 10.1 polegadas',
+                        'Memória Interna: 32GB',
+                        'Possuir conectividade via bluetooth',
+                        'Versão mínima do Android: 5.5.5'
+                    ]
+                },
+                tablets: {
+                    titulo: 'Tablet (Recomendado)',
+                    itens: [
+                        'Samsung Galaxy Tab A Wi-Fi 2GB Ram 32GB Octa-Core Android 9 Tela de 10.1"'
+                    ]
+                },
+                sat: {
+                    titulo: 'SAT',
+                    recomendados: [
+                        'TANCA S1000',
+                        'ELGIN SMART'
+                    ],
+                    testados: [
+                        'ELGIN SAT GO',
+                        'ELGIN SMART',
+                        'TANCA TS 1000',
+                        'TANCA TS 2000',
+                        'CONTROL ID SAT ID (Recomendado, fácil contato com suporte técnico)',
+                        'EPSON SAT A10',
+                        'DIMEP D-SAT 2.0 (Recomendado, fácil contato com suporte técnico)',
+                        'DIMEP D-SAT (Recomendado, fácil contato com suporte técnico)',
+                        'SWEDA SS-2000 (Recomendado, fácil contato com suporte técnico)',
+                        'SWEDA SS-1000 (Recomendado, fácil contato com suporte técnico)',
+                        'KRYPTUS EASYS@T',
+                        'GERTEC GERSAT',
+                        'NITERE NSAT-4200',
+                        'URANO',
+                        'JETWAY JS-1000'
+                    ]
+                },
+                leitoresCodigo: {
+                    titulo: 'Leitores de Código de Barras',
+                    itens: [
+                        'Honeywell MS5145',
+                        'Leitor Código de Barras Fixo 1D Áquila S-3200 - Bematech (PARA TOTEM SELF CHECKOUT)'
+                    ]
+                },
+                gavetasAutomaticas: {
+                    titulo: 'Gavetas Automáticas',
+                    nota: 'Todos os modelos funcionam. Recomendação muito utilizada:',
+                    itens: [
+                        'Bematech GD50',
+                        'Bematech GD56'
+                    ]
+                },
+                etiquetadoras: {
+                    titulo: 'Etiquetadoras',
+                    itens: [
+                        'Argox 214 Plus OS',
+                        'Elgin L42',
+                        'Elgin L42 PRO',
+                        'Zebra GC420 (Não pode ser modelo EPL)'
+                    ]
+                },
+                pinpads: {
+                    titulo: 'Pinpads',
+                    itens: [
+                        'Pinpad Ingenico IPP320',
+                        'Pinpad PPC920',
+                        'Pinpad PPC930',
+                        'Pinpad MP15'
+                    ]
+                },
+                monitoresTouch: {
+                    titulo: 'Monitores Touch Screen',
+                    itens: [
+                        'Monitor Dell P2424HT Touchscreen 24"',
+                        'Monitor Touch Screen Multitoque 18,5 ou 23 - Lynx Wave'
+                    ]
+                },
+                bancosSitef: {
+                    titulo: 'Bancos Credenciados SITEF',
+                    comPix: [
+                        'Itaú Unibanco',
+                        'Banco SICREDI',
+                        'Banco do Brasil',
+                        'Banco SICOOB',
+                        'Banco Bradesco',
+                        'Banco Santander',
+                        'Banco VerdeCard / Quero Quero Pag'
+                    ],
+                    semGarantia: [
+                        'Ailos',
+                        'Banco Original',
+                        'Cielo',
+                        'Efí (Gerencianet)',
+                        'PagSeguro PagBank',
+                        'Realize CFI',
+                        'Senff',
+                        'Tribanco',
+                        'Unicred',
+                        'Mercado Pago',
+                        'Rede',
+                        'Stone',
+                        'SafraPay',
+                        'Vero',
+                        'Getnet'
+                    ]
+                }
+            };
+
+            // --- Configurações de Design Melhoradas ---
             const MARGIN = 20;
             const PAGE_WIDTH = doc.internal.pageSize.width;
             const PAGE_HEIGHT = doc.internal.pageSize.height;
             const FONT_REGULAR = 'helvetica';
             const FONT_BOLD = 'helvetica';
-            const ACCENT_COLOR = '#2563EB'; // Azul corporativo
-            const DARK_GRAY = '#374151';
-            const MEDIUM_GRAY = '#6B7280';
-            const LIGHT_GRAY = '#F3F4F6';
-            const HEADER_HEIGHT = 20;
-            const FOOTER_HEIGHT = 15;
-            let y = HEADER_HEIGHT + 15;
+            const ACCENT_COLOR = '#1E40AF'; // Azul mais profissional
+            const PRIMARY_COLOR = '#2563EB'; // Azul corporativo
+            const DARK_GRAY = '#1F2937'; // Mais escuro para melhor contraste
+            const MEDIUM_GRAY = '#4B5563'; // Mais escuro
+            const LIGHT_GRAY = '#F9FAFB'; // Mais suave
+            const SECTION_BG = '#F3F4F6'; // Fundo para seções
+            const HEADER_HEIGHT = 25; // Aumentado para mais espaço
+            const FOOTER_HEIGHT = 18; // Aumentado
+            let y = HEADER_HEIGHT + 20;
             const generationDate = new Date().toLocaleDateString('pt-BR');
 
             // Função auxiliar para carregar imagem e converter para Data URL
@@ -464,44 +667,113 @@ function quoteCalculator() {
                 });
             };
 
-            // --- Funções de Desenho ---
-            const drawHeader = async (doc) => { // Tornando a função assíncrona
+            // --- Funções de Desenho Melhoradas ---
+            const drawHeader = async (doc) => {
                 const LOGO_URL = 'https://manual.cplug.com.br/uploads/images/system/2021-02/kFDdmOgun4T92suN-LOGO-PNG.png';
-                const LOGO_WIDTH = 40; 
-                const LOGO_HEIGHT = 15; 
+                const LOGO_WIDTH = 45;
+                const LOGO_HEIGHT = 16;
                 const LOGO_X = MARGIN;
-                const LOGO_Y = (HEADER_HEIGHT - LOGO_HEIGHT) / 2; // Centraliza verticalmente
+                const LOGO_Y = (HEADER_HEIGHT - LOGO_HEIGHT) / 2;
 
-                doc.setFillColor('#000000'); // Fundo preto para o cabeçalho
+                // Header com gradiente mais suave
+                doc.setFillColor(30, 58, 138); // Azul escuro profissional
                 doc.rect(0, 0, PAGE_WIDTH, HEADER_HEIGHT, 'F');
                 
-                // Adiciona a imagem da logo
+                // Linha decorativa
+                const primaryRgbHeader = hexToRgb(PRIMARY_COLOR);
+                if (primaryRgbHeader) {
+                    doc.setFillColor(primaryRgbHeader.r, primaryRgbHeader.g, primaryRgbHeader.b);
+                }
+                doc.rect(0, HEADER_HEIGHT - 2, PAGE_WIDTH, 2, 'F');
+
                 try {
                     const imageDataUrl = await getImageDataUrl(LOGO_URL);
                     doc.addImage(imageDataUrl, 'PNG', LOGO_X, LOGO_Y, LOGO_WIDTH, LOGO_HEIGHT);
                 } catch (error) {
                     console.error("Não foi possível adicionar a logo ao PDF:", error);
-                    // Opcional: Adicionar um texto placeholder ou apenas ignorar a imagem
                 }
 
-                doc.setFontSize(12);
+                doc.setFontSize(10);
                 doc.setTextColor(255, 255, 255);
                 doc.setFont(FONT_BOLD, 'bold');
-                // Ajusta a posição do texto para ficar após a logo
-                doc.text('ConnectPlug', LOGO_X + LOGO_WIDTH + 5, 13); // 5 unidades de espaçamento após a logo
-                doc.setFontSize(10);
-                doc.setFont(FONT_REGULAR, 'normal');
-                doc.text('Proposta Comercial', PAGE_WIDTH - MARGIN, 13, { align: 'right' });
+                // Centraliza o nome da empresa no meio superior
+                const companyName = 'CONNECTPLUG DESENVOLVIMENTO DE SOFTWARES LTDA';
+                const nameLines = doc.splitTextToSize(companyName, PAGE_WIDTH - MARGIN * 2);
+                let nameY = 13;
+                for (const line of nameLines) {
+                    doc.text(line, PAGE_WIDTH / 2, nameY, { align: 'center' });
+                    nameY += 5;
+                }
+            };
+
+            // Função para converter hex para RGB (definida antes de todas as funções)
+            const hexToRgb = (hex) => {
+                const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+                return result ? {
+                    r: parseInt(result[1], 16),
+                    g: parseInt(result[2], 16),
+                    b: parseInt(result[3], 16)
+                } : null;
             };
 
             const drawFooter = (doc) => {
-                doc.setFillColor(DARK_GRAY);
+                // Footer melhorado
+                const darkGrayRgb = hexToRgb(DARK_GRAY);
+                if (darkGrayRgb) {
+                    doc.setFillColor(darkGrayRgb.r, darkGrayRgb.g, darkGrayRgb.b);
+                }
                 doc.rect(0, PAGE_HEIGHT - FOOTER_HEIGHT, PAGE_WIDTH, FOOTER_HEIGHT, 'F');
+
+                // Linha decorativa superior do footer
+                const primaryRgb = hexToRgb(PRIMARY_COLOR);
+                if (primaryRgb) {
+                    doc.setFillColor(primaryRgb.r, primaryRgb.g, primaryRgb.b);
+                }
+                doc.rect(0, PAGE_HEIGHT - FOOTER_HEIGHT, PAGE_WIDTH, 2, 'F');
+
                 doc.setFontSize(8);
                 doc.setTextColor(255, 255, 255);
                 doc.setFont(FONT_REGULAR, 'normal');
-                doc.text('ConnectPlug - Soluções Inteligentes para o seu negócio', MARGIN, PAGE_HEIGHT - 6);
-                doc.text(`Proposta gerada em ${generationDate}`, PAGE_WIDTH - MARGIN, PAGE_HEIGHT - 6, { align: 'right' });
+                doc.text('ConnectPlug - Soluções Inteligentes para o seu negócio', MARGIN, PAGE_HEIGHT - 8);
+                doc.setFontSize(7);
+                doc.text(`Gerado em ${generationDate}`, PAGE_WIDTH - MARGIN, PAGE_HEIGHT - 8, { align: 'right' });
+            };
+
+            // Função para desenhar barra horizontal de separamento azul
+            const drawBlueSeparator = (doc, yPos) => {
+                const accentRgb = hexToRgb(ACCENT_COLOR);
+                if (accentRgb) {
+                    doc.setFillColor(accentRgb.r, accentRgb.g, accentRgb.b);
+                }
+                doc.rect(MARGIN, yPos - 2, PAGE_WIDTH - MARGIN * 2, 3, 'F');
+            };
+
+            // Função para desenhar seção de título melhorada
+            const drawSectionTitle = (doc, title, yPos) => {
+                // Linha decorativa antes do título
+                const accentRgb = hexToRgb(ACCENT_COLOR);
+                if (accentRgb) {
+                    doc.setDrawColor(accentRgb.r, accentRgb.g, accentRgb.b);
+                }
+                doc.setLineWidth(0.5);
+                doc.line(MARGIN, yPos - 3, PAGE_WIDTH - MARGIN, yPos - 3);
+
+                // Fundo do título
+                const bgRgb = hexToRgb(SECTION_BG);
+                if (bgRgb) {
+                    doc.setFillColor(bgRgb.r, bgRgb.g, bgRgb.b);
+                }
+                doc.roundedRect(MARGIN, yPos - 2, PAGE_WIDTH - MARGIN * 2, 10, 2, 2, 'F');
+
+                doc.setFontSize(13);
+                doc.setFont(FONT_BOLD, 'bold');
+                const darkGrayRgb = hexToRgb(DARK_GRAY);
+                if (darkGrayRgb) {
+                    doc.setTextColor(darkGrayRgb.r, darkGrayRgb.g, darkGrayRgb.b);
+                }
+                doc.text(title, MARGIN + 3, yPos + 4);
+
+                return yPos + 12;
             };
 
             // Helper para adicionar nova página se necessário
@@ -516,12 +788,20 @@ function quoteCalculator() {
             // --- GERAÇÃO DO CONTEÚDO ---
             await drawHeader(doc); // Aguarda o cabeçalho ser desenhado antes de continuar
 
-            // Título Principal
-            doc.setFontSize(22);
+            // Título Principal (Melhorado)
+            doc.setFontSize(24);
             doc.setFont(FONT_BOLD, 'bold');
             doc.setTextColor(DARK_GRAY);
             doc.text('Proposta de Solução de Software', MARGIN, y);
-            y += 10;
+
+            // Linha decorativa abaixo do título
+            const accentRgb = hexToRgb(ACCENT_COLOR);
+            if (accentRgb) {
+                doc.setDrawColor(accentRgb.r, accentRgb.g, accentRgb.b);
+            }
+            doc.setLineWidth(1);
+            doc.line(MARGIN, y + 3, PAGE_WIDTH - MARGIN, y + 3);
+            y += 12;
             
             // Dados da Proposta
             doc.setFontSize(10);
@@ -534,13 +814,9 @@ function quoteCalculator() {
             doc.text(`Código: ${this.generatedCouponCode}`, PAGE_WIDTH - MARGIN, y, { align: 'right' });
             y += 10;
 
-            // Seção: Dados do Cliente
+            // Seção: Dados do Cliente (Melhorado)
             await checkPageBreak(40);
-            doc.setFontSize(14);
-            doc.setFont(FONT_BOLD, 'bold');
-            doc.setTextColor(DARK_GRAY);
-            doc.text('DADOS DO CLIENTE', MARGIN, y);
-            y += 8;
+            y = drawSectionTitle(doc, 'DADOS DO CLIENTE', y);
 
             doc.setFontSize(10);
             doc.setFont(FONT_REGULAR, 'normal');
@@ -567,17 +843,21 @@ function quoteCalculator() {
             }
             y += 10;
 
-            // Seção: Resumo da Proposta
+            // Seção: Resumo da Proposta (Melhorado)
             await checkPageBreak(50);
-            doc.setFontSize(14);
-            doc.setFont(FONT_BOLD, 'bold');
-            doc.setTextColor(DARK_GRAY);
-            doc.text('RESUMO DA PROPOSTA', MARGIN, y);
-            y += 8;
+            y = drawSectionTitle(doc, 'RESUMO DA PROPOSTA', y);
 
-            // Card Principal (Plano + Valor Final)
-            doc.setFillColor(LIGHT_GRAY);
-            doc.roundedRect(MARGIN, y, PAGE_WIDTH - MARGIN * 2, 30, 3, 3, 'F');
+            // Card Principal (Plano + Valor Final) - Melhorado
+            const lightGrayRgb = hexToRgb(LIGHT_GRAY);
+            if (lightGrayRgb) {
+                doc.setFillColor(lightGrayRgb.r, lightGrayRgb.g, lightGrayRgb.b);
+            }
+            const accentRgb2 = hexToRgb(ACCENT_COLOR);
+            if (accentRgb2) {
+                doc.setDrawColor(accentRgb2.r, accentRgb2.g, accentRgb2.b);
+            }
+            doc.setLineWidth(0.5);
+            doc.roundedRect(MARGIN, y, PAGE_WIDTH - MARGIN * 2, 32, 4, 4, 'FD');
             
             doc.setFontSize(11);
             doc.setFont(FONT_REGULAR, 'normal');
@@ -589,8 +869,23 @@ function quoteCalculator() {
             doc.text('VALOR MENSAL', PAGE_WIDTH - MARGIN - 5, y + 10, { align: 'right' });
             doc.setFontSize(22);
             doc.setFont(FONT_BOLD, 'bold');
-            doc.setTextColor(ACCENT_COLOR);
+            const accentRgb3 = hexToRgb(ACCENT_COLOR);
+            if (accentRgb3) {
+                doc.setTextColor(accentRgb3.r, accentRgb3.g, accentRgb3.b);
+            }
             doc.text(`R$ ${this.summary.finalTotal.toFixed(2).replace('.', ',')}`, PAGE_WIDTH - MARGIN - 5, y + 20, { align: 'right' });
+            
+            // Mostra custo de setup se houver
+            if (this.summary.setupCost > 0) {
+                doc.setFontSize(9);
+                doc.setFont(FONT_REGULAR, 'normal');
+                const setupOrangeRgb = hexToRgb('#F97316');
+                if (setupOrangeRgb) {
+                    doc.setTextColor(setupOrangeRgb.r, setupOrangeRgb.g, setupOrangeRgb.b);
+                }
+                doc.text(`+ Setup: R$ ${this.summary.setupCost.toFixed(2).replace('.', ',')} (1º mês)`, PAGE_WIDTH - MARGIN - 5, y + 27, { align: 'right' });
+            }
+            
             y += 35;
 
             // Detalhamento de Valores
@@ -599,6 +894,18 @@ function quoteCalculator() {
             doc.setTextColor(MEDIUM_GRAY);
             doc.text(`Subtotal: R$ ${this.summary.subtotal.toFixed(2).replace('.', ',')}`, PAGE_WIDTH - MARGIN, y, { align: 'right' });
             y += 5;
+            if (this.summary.setupCost > 0) {
+                const setupGrayRgb = hexToRgb('#F97316'); // Laranja
+                if (setupGrayRgb) {
+                    doc.setTextColor(setupGrayRgb.r, setupGrayRgb.g, setupGrayRgb.b);
+                }
+                doc.text(`Custo de Setup (1º mês): R$ ${this.summary.setupCost.toFixed(2).replace('.', ',')}`, PAGE_WIDTH - MARGIN, y, { align: 'right' });
+                const mediumGrayRgb2 = hexToRgb(MEDIUM_GRAY);
+                if (mediumGrayRgb2) {
+                    doc.setTextColor(mediumGrayRgb2.r, mediumGrayRgb2.g, mediumGrayRgb2.b);
+                }
+                y += 5;
+            }
             if (this.summary.courtesyValue > 0) {
                 doc.text(`Cortesia (${this.courtesyModuleName}): - R$ ${this.summary.courtesyValue.toFixed(2).replace('.', ',')}`, PAGE_WIDTH - MARGIN, y, { align: 'right' });
                 y += 5;
@@ -609,14 +916,10 @@ function quoteCalculator() {
             }
             y += 10;
 
-            // Seção: Condições Especiais (se houver)
+            // Seção: Condições Especiais (se houver) - Melhorado
             if (this.summary.totalReduction > 0) {
                 await checkPageBreak(50);
-                doc.setFontSize(14);
-                doc.setFont(FONT_BOLD, 'bold');
-                doc.setTextColor(DARK_GRAY);
-                doc.text('CONDIÇÕES ESPECIAIS', MARGIN, y);
-                y += 8;
+                y = drawSectionTitle(doc, 'CONDIÇÕES ESPECIAIS', y);
 
                 doc.setFontSize(10);
                 doc.setFont(FONT_REGULAR, 'normal');
@@ -629,27 +932,68 @@ function quoteCalculator() {
                 y += 10;
             }
 
-            // Seção: Módulos Inclusos
-            await checkPageBreak(100); // Estimativa de espaço para o título e alguns itens
-            doc.setFontSize(14);
-            doc.setFont(FONT_BOLD, 'bold');
-            doc.setTextColor(DARK_GRAY);
-            doc.text('MÓDULOS INCLUSOS', MARGIN, y);
-            y += 8;
+            // Seção: Módulos Inclusos - SEMPRE na Página 2
+            // Sempre força nova página para começar na página 2
+            doc.addPage();
+            await drawHeader(doc);
+            y = HEADER_HEIGHT + 20;
+
+            y = drawSectionTitle(doc, 'MÓDULOS INCLUSOS', y);
 
             doc.setFontSize(10);
             doc.setFont(FONT_BOLD, 'bold');
-            doc.setTextColor(DARK_GRAY);
+            const darkGrayRgbModulos = hexToRgb(DARK_GRAY);
+            if (darkGrayRgbModulos) {
+                doc.setTextColor(darkGrayRgbModulos.r, darkGrayRgbModulos.g, darkGrayRgbModulos.b);
+            }
             doc.text('Módulos Fixos do Plano:', MARGIN, y);
             y += 5;
+
             doc.setFont(FONT_REGULAR, 'normal');
-            doc.setTextColor(MEDIUM_GRAY);
-            for (const item of this.selectedPlan.fixedModules) { // Usando for...of para await
-                await checkPageBreak(5);
-                doc.text(`• ${item}`, MARGIN + 5, y);
-                y += 5;
+            const mediumGrayRgbModulos = hexToRgb(MEDIUM_GRAY);
+            if (mediumGrayRgbModulos) {
+                doc.setTextColor(mediumGrayRgbModulos.r, mediumGrayRgbModulos.g, mediumGrayRgbModulos.b);
             }
-            y += 5;
+
+            // Distribui os módulos em 2 colunas: máximo 14 na primeira, resto na segunda
+            const MAX_ITENS_COLUNA_1 = 14;
+            const COLUMN_COUNT_MOD = 2;
+            const COLUMN_GAP_MOD = 8;
+            const availableWidthMod = PAGE_WIDTH - MARGIN * 2;
+            const columnWMod = (availableWidthMod - COLUMN_GAP_MOD) / COLUMN_COUNT_MOD;
+
+            const fixedModulesList = this.selectedPlan.fixedModules;
+            const itemsColuna1 = fixedModulesList.slice(0, MAX_ITENS_COLUNA_1);
+            const itemsColuna2 = fixedModulesList.slice(MAX_ITENS_COLUNA_1);
+
+            let startY = y;
+            let maxY = y;
+
+            // Coluna 1 (máximo 14 itens)
+            let col1Y = startY;
+            const col1X = MARGIN + 5;
+            for (const item of itemsColuna1) {
+                await checkPageBreak(5);
+                const lines = doc.splitTextToSize(`• ${item}`, columnWMod - 10);
+                doc.text(lines, col1X, col1Y);
+                col1Y += lines.length * 4.5;
+                if (col1Y > maxY) maxY = col1Y;
+            }
+
+            // Coluna 2 (itens excedentes)
+            if (itemsColuna2.length > 0) {
+                let col2Y = startY;
+                const col2X = MARGIN + columnWMod + COLUMN_GAP_MOD + 5;
+                for (const item of itemsColuna2) {
+                    await checkPageBreak(5);
+                    const lines = doc.splitTextToSize(`• ${item}`, columnWMod - 10);
+                    doc.text(lines, col2X, col2Y);
+                    col2Y += lines.length * 4.5;
+                    if (col2Y > maxY) maxY = col2Y;
+                }
+            }
+
+            y = maxY + 5;
 
             if (this.selectedPlan.additionalUsers.count > 0 || this.selectedPlan.additionalPdvs.count > 0) {
                 await checkPageBreak(30);
@@ -688,7 +1032,10 @@ function quoteCalculator() {
                     let moduleText = `• ${mod.quantifiable ? `${mod.count}x ` : ''}${mod.name}`;
                     if (mod.name === this.courtesyModuleName) {
                         moduleText += ` (Cortesia)`;
-                        doc.setTextColor(ACCENT_COLOR); // Cor diferente para cortesia
+                        const accentRgb4 = hexToRgb(ACCENT_COLOR);
+                        if (accentRgb4) {
+                            doc.setTextColor(accentRgb4.r, accentRgb4.g, accentRgb4.b);
+                        }
                     } else {
                         moduleText += ` (R$ ${mod.price.toFixed(2).replace('.', ',')})`;
                         doc.setTextColor(MEDIUM_GRAY);
@@ -699,15 +1046,434 @@ function quoteCalculator() {
                 y += 5;
             }
 
-            // Mensagem de Encerramento
-            await checkPageBreak(20);
+            // Seção: Informações sobre Treinamentos - SEMPRE na Página 3
+            // Força nova página para sempre começar na página 3
+            doc.addPage();
+            await drawHeader(doc);
+            y = HEADER_HEIGHT + 20;
+
+            // Barra horizontal de separamento azul
+            drawBlueSeparator(doc, y);
+            y += 8;
+
+            doc.setFontSize(14);
+            doc.setFont(FONT_BOLD, 'bold');
+            const darkGrayRgbTraining = hexToRgb(DARK_GRAY);
+            if (darkGrayRgbTraining) {
+                doc.setTextColor(darkGrayRgbTraining.r, darkGrayRgbTraining.g, darkGrayRgbTraining.b);
+            }
+            doc.text('INFORMAÇÕES SOBRE TREINAMENTOS:', MARGIN, y);
+            y += 10;
+
             doc.setFontSize(10);
             doc.setFont(FONT_REGULAR, 'normal');
-            doc.setTextColor(DARK_GRAY);
+            const mediumGrayRgbTraining = hexToRgb(MEDIUM_GRAY);
+            if (mediumGrayRgbTraining) {
+                doc.setTextColor(mediumGrayRgbTraining.r, mediumGrayRgbTraining.g, mediumGrayRgbTraining.b);
+            }
+
+            // Tabela de agendamentos
+            doc.setFont(FONT_BOLD, 'bold');
+            if (darkGrayRgbTraining) {
+                doc.setTextColor(darkGrayRgbTraining.r, darkGrayRgbTraining.g, darkGrayRgbTraining.b);
+            }
+            doc.text('Até R$199,00 (Plano PDV Básico)', MARGIN, y);
+            doc.setFont(FONT_REGULAR, 'normal');
+            if (mediumGrayRgbTraining) {
+                doc.setTextColor(mediumGrayRgbTraining.r, mediumGrayRgbTraining.g, mediumGrayRgbTraining.b);
+            }
+            doc.text('> 3 agendamentos', MARGIN + 100, y);
+            y += 6;
+
+            doc.setFont(FONT_BOLD, 'bold');
+            if (darkGrayRgbTraining) {
+                doc.setTextColor(darkGrayRgbTraining.r, darkGrayRgbTraining.g, darkGrayRgbTraining.b);
+            }
+            doc.text('De R$199,01 a R$299,00 (Plano Gestão)', MARGIN, y);
+            doc.setFont(FONT_REGULAR, 'normal');
+            if (mediumGrayRgbTraining) {
+                doc.setTextColor(mediumGrayRgbTraining.r, mediumGrayRgbTraining.g, mediumGrayRgbTraining.b);
+            }
+            doc.text('> 4 agendamentos', MARGIN + 100, y);
+            y += 6;
+
+            doc.setFont(FONT_BOLD, 'bold');
+            if (darkGrayRgbTraining) {
+                doc.setTextColor(darkGrayRgbTraining.r, darkGrayRgbTraining.g, darkGrayRgbTraining.b);
+            }
+            doc.text('De R$299,01 a R$399,00 (Plano Performance)', MARGIN, y);
+            doc.setFont(FONT_REGULAR, 'normal');
+            if (mediumGrayRgbTraining) {
+                doc.setTextColor(mediumGrayRgbTraining.r, mediumGrayRgbTraining.g, mediumGrayRgbTraining.b);
+            }
+            doc.text('> 6 agendamentos', MARGIN + 100, y);
+            y += 6;
+
+            doc.setFont(FONT_BOLD, 'bold');
+            if (darkGrayRgbTraining) {
+                doc.setTextColor(darkGrayRgbTraining.r, darkGrayRgbTraining.g, darkGrayRgbTraining.b);
+            }
+            doc.text('A partir de R$399,01 (Plano Personalizado etc)', MARGIN, y);
+            doc.setFont(FONT_REGULAR, 'normal');
+            if (mediumGrayRgbTraining) {
+                doc.setTextColor(mediumGrayRgbTraining.r, mediumGrayRgbTraining.g, mediumGrayRgbTraining.b);
+            }
+            doc.text('> 8 agendamentos', MARGIN + 100, y);
+            y += 10;
+
+            doc.setFontSize(9);
+            if (mediumGrayRgbTraining) {
+                doc.setTextColor(mediumGrayRgbTraining.r, mediumGrayRgbTraining.g, mediumGrayRgbTraining.b);
+            }
+            const biText = 'Caso o cliente contrate o módulo de Business Intelligence (BI), ganha +2 agendamentos no pacote';
+            const biLines = doc.splitTextToSize(biText, PAGE_WIDTH - MARGIN * 2);
+            doc.text(biLines, MARGIN, y);
+            y += biLines.length * 5 + 2;
+
+            const fidelidadeText = 'Caso o cliente contrate o módulo de Programa de Fidelidade, ganha +3 agendamentos no pacote.';
+            doc.text(fidelidadeText, MARGIN, y);
+            y += 8;
+
+            // Aviso destacado sobre não comparecimento
+            doc.setFontSize(10);
+            doc.setFont(FONT_BOLD, 'bold');
+            doc.setTextColor(200, 0, 0); // Vermelho para destacar
+            doc.text('• Não comparecimento no agendamento:', MARGIN, y);
+            y += 6;
+
+            doc.setFontSize(9);
+            doc.setFont(FONT_BOLD, 'bold');
+            if (darkGrayRgbTraining) {
+                doc.setTextColor(darkGrayRgbTraining.r, darkGrayRgbTraining.g, darkGrayRgbTraining.b);
+            }
+            const avisoText = `o não comparecimento no dia e horário do agendamento irá acarretar no consumo do agendamento dentro do seu pacote disponível!
+
+Caso deseje realizar o cancelamento do agendamento, sinalize até 24 horas antes do agendamento para que não haja desconto em seu pacote.
+
+ 
+Caso deseje, você poderá adquirir mais treinamentos com duração de 01h:30min pelo valor de R$ 199,00`;
+            const avisoLines = doc.splitTextToSize(avisoText, PAGE_WIDTH - MARGIN * 2);
+            doc.text(avisoLines, MARGIN, y);
+            y += avisoLines.length * 5 + 8;
+
+            // Barra horizontal de separamento azul
+            // drawBlueSeparator(doc, y);
+            y += 8;
+
+            // Seção: Equipamentos Homologados - SEMPRE na Página 4 em diante
+            // Força nova página para sempre começar na página 4
+            doc.addPage();
+            await drawHeader(doc);
+            y = HEADER_HEIGHT + 20;
+
+            y = drawSectionTitle(doc, 'EQUIPAMENTOS HOMOLOGADOS', y);
+
+            doc.setFontSize(9);
+            doc.setFont(FONT_REGULAR, 'normal');
+            doc.setTextColor(MEDIUM_GRAY);
+
+            // Função auxiliar para adicionar lista de equipamentos em colunas
+            const addEquipmentListColumns = async (titulo, items, yPos, isSubtitle = false, columnWidth = null) => {
+                const COLUMN_COUNT = 2;
+                const COLUMN_GAP = 8;
+                const availableWidth = PAGE_WIDTH - MARGIN * 2;
+                const columnW = columnWidth || (availableWidth - COLUMN_GAP) / COLUMN_COUNT;
+
+                await checkPageBreak(15 + Math.ceil(items.length / COLUMN_COUNT) * 5);
+
+                if (isSubtitle && titulo) {
+                    doc.setFontSize(9);
+                    doc.setFont(FONT_BOLD, 'bold');
+                    const mediumGrayRgb = hexToRgb(MEDIUM_GRAY);
+                    if (mediumGrayRgb) {
+                        doc.setTextColor(mediumGrayRgb.r, mediumGrayRgb.g, mediumGrayRgb.b);
+                    }
+                    doc.text(titulo, MARGIN + 5, yPos);
+                    yPos += 5;
+                } else if (titulo) {
+                    doc.setFontSize(10);
+                    doc.setFont(FONT_BOLD, 'bold');
+                    const darkGrayRgb = hexToRgb(DARK_GRAY);
+                    if (darkGrayRgb) {
+                        doc.setTextColor(darkGrayRgb.r, darkGrayRgb.g, darkGrayRgb.b);
+                    }
+                    doc.text(titulo, MARGIN + 3, yPos);
+                    yPos += 6;
+                }
+
+                doc.setFontSize(8);
+                doc.setFont(FONT_REGULAR, 'normal');
+                const mediumGrayRgb2 = hexToRgb(MEDIUM_GRAY);
+                if (mediumGrayRgb2) {
+                    doc.setTextColor(mediumGrayRgb2.r, mediumGrayRgb2.g, mediumGrayRgb2.b);
+                }
+
+                const itemsPerColumn = Math.ceil(items.length / COLUMN_COUNT);
+                const columnHeights = [];
+
+                for (let col = 0; col < COLUMN_COUNT; col++) {
+                    const startIdx = col * itemsPerColumn;
+                    const endIdx = Math.min(startIdx + itemsPerColumn, items.length);
+                    const columnItems = items.slice(startIdx, endIdx);
+
+                    let colY = yPos;
+                    const colX = MARGIN + (col * (columnW + COLUMN_GAP));
+
+                    for (const item of columnItems) {
+                        // Verifica se precisa de nova página
+                        if (colY + 5 > PAGE_HEIGHT - FOOTER_HEIGHT - 10) {
+                            doc.addPage();
+                            await drawHeader(doc);
+                            colY = HEADER_HEIGHT + 20;
+                            // Redesenha o título se necessário
+                            if (titulo && !isSubtitle) {
+                                doc.setFontSize(10);
+                                doc.setFont(FONT_BOLD, 'bold');
+                                const darkGrayRgb2 = hexToRgb(DARK_GRAY);
+                                if (darkGrayRgb2) {
+                                    doc.setTextColor(darkGrayRgb2.r, darkGrayRgb2.g, darkGrayRgb2.b);
+                                }
+                                doc.text(titulo, MARGIN + 3, colY);
+                                colY += 6;
+                                // Reseta a cor para os itens
+                                if (mediumGrayRgb2) {
+                                    doc.setTextColor(mediumGrayRgb2.r, mediumGrayRgb2.g, mediumGrayRgb2.b);
+                                }
+                            }
+                        }
+
+                        const lines = doc.splitTextToSize(`• ${item}`, columnW - 5);
+                        doc.text(lines, colX + 5, colY);
+                        colY += lines.length * 4;
+                    }
+
+                    columnHeights.push(colY);
+                }
+
+                // Retorna a maior altura das colunas
+                return Math.max(...columnHeights) + 5;
+            };
+
+            // Função auxiliar para adicionar lista de equipamentos (versão simples para títulos principais)
+            const addEquipmentList = async (titulo, items, yPos, isSubtitle = false) => {
+                return await addEquipmentListColumns(titulo, items, yPos, isSubtitle);
+            };
+
+            // Página 3 - Equipamentos Homologados
+            // Impressoras Térmicas
+            await checkPageBreak(15);
+            drawBlueSeparator(doc, y);
+            y += 8;
+            y = await addEquipmentListColumns(equipamentosHomologados.impressorasTermicas.titulo, equipamentosHomologados.impressorasTermicas.recomendados, y);
+
+            // Balanças
+            await checkPageBreak(15);
+            drawBlueSeparator(doc, y);
+            y += 8;
+            y = await addEquipmentListColumns(equipamentosHomologados.balancas.titulo, equipamentosHomologados.balancas.recomendados, y);
+
+            // Computadores ou Notebooks
+            await checkPageBreak(15);
+            drawBlueSeparator(doc, y);
+            y += 8;
+            y = await addEquipmentListColumns('Computadores ou Notebooks - Requisitos Mínimos', equipamentosHomologados.computadores.itens, y);
+
+            // Celulares
+            await checkPageBreak(15);
+            drawBlueSeparator(doc, y);
+            y += 8;
+            y = await addEquipmentListColumns(equipamentosHomologados.celulares.titulo, equipamentosHomologados.celulares.itens, y);
+
+            // Tablets
+            await checkPageBreak(15);
+            drawBlueSeparator(doc, y);
+            y += 8;
+            y = await addEquipmentListColumns(equipamentosHomologados.tablets.titulo, equipamentosHomologados.tablets.itens, y);
+
+            // Leitores de Código de Barras
+            drawBlueSeparator(doc, y);
+            y += 8;
+
+            // Adiciona Leitores sem verificar quebra de página inicial (já foi verificado antes)
+            const leitoresTitulo = equipamentosHomologados.leitoresCodigo.titulo;
+            const leitoresItems = equipamentosHomologados.leitoresCodigo.itens;
+
+            doc.setFontSize(10);
+            doc.setFont(FONT_BOLD, 'bold');
+            const darkGrayRgbLeitores = hexToRgb(DARK_GRAY);
+            if (darkGrayRgbLeitores) {
+                doc.setTextColor(darkGrayRgbLeitores.r, darkGrayRgbLeitores.g, darkGrayRgbLeitores.b);
+            }
+            doc.text(leitoresTitulo, MARGIN + 3, y);
+            y += 6;
+
+            doc.setFontSize(8);
+            doc.setFont(FONT_REGULAR, 'normal');
+            const mediumGrayRgbLeitores = hexToRgb(MEDIUM_GRAY);
+            if (mediumGrayRgbLeitores) {
+                doc.setTextColor(mediumGrayRgbLeitores.r, mediumGrayRgbLeitores.g, mediumGrayRgbLeitores.b);
+            }
+
+            // Uma única coluna para Leitores de Código de Barras
+            const availableWidthLeit = PAGE_WIDTH - MARGIN * 2;
+
+            for (const item of leitoresItems) {
+                const lines = doc.splitTextToSize(`• ${item}`, availableWidthLeit - 10);
+                doc.text(lines, MARGIN + 5, y);
+                y += lines.length * 4.5;
+            }
+            y += 5;
+
+            // Gavetas Automáticas - forçado a ficar na mesma página
+            drawBlueSeparator(doc, y);
+            y += 8;
+
+            if (equipamentosHomologados.gavetasAutomaticas.nota) {
+                doc.setFontSize(7.5);
+                doc.setFont(FONT_REGULAR, 'italic');
+                const grayRgb2 = hexToRgb(MEDIUM_GRAY);
+                if (grayRgb2) {
+                    doc.setTextColor(grayRgb2.r, grayRgb2.g, grayRgb2.b);
+                }
+                doc.text(equipamentosHomologados.gavetasAutomaticas.nota, MARGIN + 3, y);
+                y += 4;
+            }
+
+            doc.setFontSize(10);
+            doc.setFont(FONT_BOLD, 'bold');
+            if (darkGrayRgbLeitores) {
+                doc.setTextColor(darkGrayRgbLeitores.r, darkGrayRgbLeitores.g, darkGrayRgbLeitores.b);
+            }
+            doc.text(equipamentosHomologados.gavetasAutomaticas.titulo, MARGIN + 3, y);
+            y += 6;
+
+            doc.setFontSize(8);
+            doc.setFont(FONT_REGULAR, 'normal');
+            if (mediumGrayRgbLeitores) {
+                doc.setTextColor(mediumGrayRgbLeitores.r, mediumGrayRgbLeitores.g, mediumGrayRgbLeitores.b);
+            }
+
+            // Uma única coluna para Gavetas Automáticas
+            const availableWidthGav = PAGE_WIDTH - MARGIN * 2;
+
+            for (const item of equipamentosHomologados.gavetasAutomaticas.itens) {
+                const lines = doc.splitTextToSize(`• ${item}`, availableWidthGav - 10);
+                doc.text(lines, MARGIN + 5, y);
+                y += lines.length * 4.5;
+            }
+            y += 5;
+
+            // Etiquetadoras e demais equipamentos - verifica se precisa de nova página
+            // Só cria página 4 se realmente não houver espaço na página 3
+            const espacoMinimoP4 = 40; // Espaço mínimo necessário para próxima seção
+            if (y + espacoMinimoP4 > PAGE_HEIGHT - FOOTER_HEIGHT - 10) {
+                doc.addPage();
+                await drawHeader(doc);
+                y = HEADER_HEIGHT + 20;
+                y = drawSectionTitle(doc, 'EQUIPAMENTOS HOMOLOGADOS', y);
+            }
+
+            drawBlueSeparator(doc, y);
+            y += 8;
+            y = await addEquipmentListColumns(equipamentosHomologados.etiquetadoras.titulo, equipamentosHomologados.etiquetadoras.itens, y);
+
+            // Pinpads
+            await checkPageBreak(15);
+            drawBlueSeparator(doc, y);
+            y += 8;
+            y = await addEquipmentListColumns(equipamentosHomologados.pinpads.titulo, equipamentosHomologados.pinpads.itens, y);
+
+            // Monitores Touch Screen
+            await checkPageBreak(15);
+            drawBlueSeparator(doc, y);
+            y += 8;
+            y = await addEquipmentListColumns(equipamentosHomologados.monitoresTouch.titulo, equipamentosHomologados.monitoresTouch.itens, y);
+
+            // SAT (APENAS RECOMENDADOS)
+            await checkPageBreak(15);
+            drawBlueSeparator(doc, y);
+            y += 8;
+            y = await addEquipmentListColumns('SAT (APENAS RECOMENDADOS)', equipamentosHomologados.sat.recomendados, y);
+
+            // Bancos Credenciados SITEF
+            await checkPageBreak(15);
+            drawBlueSeparator(doc, y);
+            y += 8;
+            const darkGrayRgbTitle = hexToRgb(DARK_GRAY);
+            if (darkGrayRgbTitle) {
+                doc.setTextColor(darkGrayRgbTitle.r, darkGrayRgbTitle.g, darkGrayRgbTitle.b);
+            }
+            doc.setFontSize(10);
+            doc.setFont(FONT_BOLD, 'bold');
+            doc.text(equipamentosHomologados.bancosSitef.titulo, MARGIN + 3, y);
+            y += 6;
+
+            y = await addEquipmentListColumns('Com PIX:', equipamentosHomologados.bancosSitef.comPix, y, true);
+
+            // Sem garantia de funcionamento - ajustado para não criar nova página
+            doc.setFontSize(8);
+            doc.setFont(FONT_REGULAR, 'italic');
+            const grayRgb3 = hexToRgb(MEDIUM_GRAY);
+            if (grayRgb3) {
+                doc.setTextColor(grayRgb3.r, grayRgb3.g, grayRgb3.b);
+            }
+            doc.text('Sem garantia de funcionamento:', MARGIN + 3, y);
+            y += 4;
+
+            // Lista de bancos sem garantia - em coluna única para não quebrar página
+            doc.setFontSize(8);
+            doc.setFont(FONT_REGULAR, 'normal');
+            if (grayRgb3) {
+                doc.setTextColor(grayRgb3.r, grayRgb3.g, grayRgb3.b);
+            }
+
+            const COLUMN_COUNT_BANCO = 2;
+            const COLUMN_GAP_BANCO = 8;
+            const availableWidthBanco = PAGE_WIDTH - MARGIN * 2;
+            const columnWBanco = (availableWidthBanco - COLUMN_GAP_BANCO) / COLUMN_COUNT_BANCO;
+            const itemsPerColumnBanco = Math.ceil(equipamentosHomologados.bancosSitef.semGarantia.length / COLUMN_COUNT_BANCO);
+            const columnHeightsBanco = [];
+
+            for (let col = 0; col < COLUMN_COUNT_BANCO; col++) {
+                const startIdx = col * itemsPerColumnBanco;
+                const endIdx = Math.min(startIdx + itemsPerColumnBanco, equipamentosHomologados.bancosSitef.semGarantia.length);
+                const columnItems = equipamentosHomologados.bancosSitef.semGarantia.slice(startIdx, endIdx);
+
+                let colY = y;
+                const colX = MARGIN + (col * (columnWBanco + COLUMN_GAP_BANCO));
+
+                for (const item of columnItems) {
+                    const lines = doc.splitTextToSize(`• ${item}`, columnWBanco - 5);
+                    doc.text(lines, colX + 5, colY);
+                    colY += lines.length * 4;
+                }
+
+                columnHeightsBanco.push(colY);
+            }
+
+            y = Math.max(...columnHeightsBanco) + 8;
+
+            // Mensagem de Encerramento (Melhorado)
+            drawBlueSeparator(doc, y);
+            y += 10;
+
+            doc.setFontSize(10);
+            doc.setFont(FONT_REGULAR, 'normal');
+            const darkGrayRgbFinal = hexToRgb(DARK_GRAY);
+            if (darkGrayRgbFinal) {
+                doc.setTextColor(darkGrayRgbFinal.r, darkGrayRgbFinal.g, darkGrayRgbFinal.b);
+            }
             doc.text('Agradecemos a sua atenção e estamos à disposição para quaisquer dúvidas.', MARGIN, y);
-            y += 5;
+            y += 7;
+
+            doc.setFont(FONT_BOLD, 'bold');
             doc.text('Atenciosamente,', MARGIN, y);
-            y += 5;
+            y += 6;
+            doc.setFontSize(11);
+            const accentRgbFinal = hexToRgb(ACCENT_COLOR);
+            if (accentRgbFinal) {
+                doc.setTextColor(accentRgbFinal.r, accentRgbFinal.g, accentRgbFinal.b);
+            }
             doc.text('Equipe ConnectPlug', MARGIN, y);
             y += 10;
 

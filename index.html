@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Calculadora de Orçamento CPlug</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="planos-data.js"></script>
     <script src="planos.js" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -99,6 +100,15 @@
                 </div>
                 
                 <p x-show="discountRuleError" class="text-red-500 text-sm mt-2" x-text="discountRuleError"></p>
+                
+                <!-- Botão para código especial quando desconto > 20% -->
+                <div x-show="discountRuleError && tempDiscountPercentage > 20" class="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                    <p class="text-sm text-yellow-800 mb-2">Para aplicar desconto acima de 20%, é necessário Autorização do Gerente.</p>
+                    <button @click="showSpecialCodeModal = true" class="w-full bg-yellow-600 text-white font-bold py-2 rounded-lg hover:bg-yellow-700 transition">
+                        Inserir Código Especial
+                    </button>
+                </div>
+                
                 <button @click="applyManualDiscount()" class="w-full bg-green-600 text-white font-bold py-2 rounded-lg hover:bg-green-700 transition mt-4">Salvar Alterações</button>
             </div>
         </div>
@@ -123,6 +133,24 @@
                     </div>
                 </div>
                 <button @click="applyClosingDate()" class="w-full bg-green-600 text-white font-bold py-2 rounded-lg hover:bg-green-700 transition mt-4">Salvar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Código Especial para Desconto > 20% -->
+    <div x-show="showSpecialCodeModal" class="modal fixed inset-0 flex items-center justify-center z-50" @click.away="showSpecialCodeModal = false" @keydown.escape.window="showSpecialCodeModal = false">
+        <div class="bg-white p-8 rounded-2xl shadow-2xl w-full max-w-md text-center" @click.stop>
+            <h2 class="text-2xl font-bold text-gray-800">Código Especial</h2>
+            <p class="text-gray-600 mt-2 mb-6">Solicite para o Gerente o Cupom de Desconto para validar</p>
+            <input type="text" x-model="specialCode" x-ref="specialCodeInput" @keydown.enter.prevent="validateSpecialCode()" placeholder="Digite o código" class="form-input text-center">
+            <p x-show="specialCodeError" class="text-red-500 text-sm mt-2">Código inválido.</p>
+            <div class="flex gap-3 mt-4">
+                <button @click="validateSpecialCode()" class="flex-1 bg-green-600 text-white font-bold py-2 rounded-lg hover:bg-green-700 transition">
+                    Validar e Aplicar
+                </button>
+                <button @click="showSpecialCodeModal = false; specialCode = ''" class="flex-1 bg-gray-600 text-white font-bold py-2 rounded-lg hover:bg-gray-700 transition">
+                    Cancelar
+                </button>
             </div>
         </div>
     </div>
@@ -238,6 +266,7 @@
                         <div class="flex justify-between"><span>Plano Base</span> <span class="summary-value">R$ <span x-text="summary.base.toFixed(2).replace('.', ',')"></span></span></div>
                         <div x-show="summary.addons > 0" class="flex justify-between" x-transition><span>Módulos Adicionais</span> <span class="summary-value">R$ <span x-text="summary.addons.toFixed(2).replace('.', ',')"></span></span></div>
                         <div x-show="summary.optionals > 0" class="flex justify-between" x-transition><span>Módulos Opcionais</span> <span class="summary-value">R$ <span x-text="summary.optionals.toFixed(2).replace('.', ',')"></span></span></div>
+                        <div x-show="summary.setupCost > 0" class="flex justify-between text-orange-600" x-transition><span>Custo de Setup (1º mês)</span> <span class="summary-value">R$ <span x-text="summary.setupCost.toFixed(2).replace('.', ',')"></span></span></div>
                         <hr>
                         <div class="flex justify-between font-bold text-xl"><span>Subtotal</span> <span class="summary-value">R$ <span x-text="summary.subtotal.toFixed(2).replace('.', ',')"></span></span></div>
                         
