@@ -1453,7 +1453,156 @@ Caso deseje, você poderá adquirir mais treinamentos com duração de 01h:30min
 
             y = Math.max(...columnHeightsBanco) + 8;
 
+            // Página adicional para Plano Bling - Sincronizações e Limitações
+            if (this.selectedPlan && this.selectedPlan.name === 'Plano Bling') {
+                doc.addPage();
+                await drawHeader(doc);
+                y = HEADER_HEIGHT + 6;
+
+                y = drawSectionTitle(doc, 'INFORMAÇÕES SOBRE INTEGRAÇÃO BLING', y);
+
+                doc.setFontSize(11);
+                doc.setFont(FONT_BOLD, 'bold');
+                const darkGrayRgbBling = hexToRgb(DARK_GRAY);
+                if (darkGrayRgbBling) {
+                    doc.setTextColor(darkGrayRgbBling.r, darkGrayRgbBling.g, darkGrayRgbBling.b);
+                }
+                doc.text('1. SINCRONIZAÇÕES:', MARGIN, y);
+                y += 8;
+
+                // Sincronização de Produtos
+                doc.setFontSize(10);
+                doc.setFont(FONT_BOLD, 'bold');
+                doc.text('SINCRONIZAÇÃO DE PRODUTOS:', MARGIN + 5, y);
+                y += 6;
+                doc.setFont(FONT_REGULAR, 'normal');
+                doc.setFontSize(9);
+                const mediumGrayRgbBling = hexToRgb(MEDIUM_GRAY);
+                if (mediumGrayRgbBling) {
+                    doc.setTextColor(mediumGrayRgbBling.r, mediumGrayRgbBling.g, mediumGrayRgbBling.b);
+                }
+                const prodText = 'Nesta funcionalidade a sincronização segue com ORIGEM na BLING e sendo enviado para CPLUG os seguintes dados:';
+                const prodLines = doc.splitTextToSize(prodText, PAGE_WIDTH - MARGIN * 2 - 10);
+                doc.text(prodLines, MARGIN + 5, y);
+                y += prodLines.length * 4.5 + 3;
+
+                // Lista de dados sincronizados
+                const produtosSync = [
+                    'Nome',
+                    'Atributos: Se utilizado, deverá ser obrigatório a contratação do módulo de GRADE DE PRODUTOS EM AMBAS PLATAFORMAS',
+                    'Parâmetros Tributários: Origem, NCM e CEST, os demais parâmetros tributários não são sincronizados e devem ser preenchidos manualmente',
+                    'Categoria: nesta sincronização serão eliminadas as categorias existentes na CPLUG e permanecerão apenas os dados oriundos da BLING',
+                    'Valor de Venda',
+                    'Código de Barras'
+                ];
+
+                doc.setFontSize(8);
+                for (const item of produtosSync) {
+                    await checkPageBreak(5);
+                    const lines = doc.splitTextToSize(`• ${item}`, PAGE_WIDTH - MARGIN * 2 - 15);
+                    doc.text(lines, MARGIN + 10, y);
+                    y += lines.length * 4;
+                }
+                y += 5;
+
+                // Sincronização de Vendas
+                await checkPageBreak(15);
+                doc.setFontSize(10);
+                doc.setFont(FONT_BOLD, 'bold');
+                if (darkGrayRgbBling) {
+                    doc.setTextColor(darkGrayRgbBling.r, darkGrayRgbBling.g, darkGrayRgbBling.b);
+                }
+                doc.text('SINCRONIZAÇÃO DE VENDAS:', MARGIN + 5, y);
+                y += 6;
+                doc.setFont(FONT_REGULAR, 'normal');
+                doc.setFontSize(9);
+                if (mediumGrayRgbBling) {
+                    doc.setTextColor(mediumGrayRgbBling.r, mediumGrayRgbBling.g, mediumGrayRgbBling.b);
+                }
+                const vendasText = 'Já nesta modalidade a sincronização segue como ORIGEM as vendas originadas na CPLUG, são enviados os seguintes dados para BLING:';
+                const vendasLines = doc.splitTextToSize(vendasText, PAGE_WIDTH - MARGIN * 2 - 10);
+                doc.text(vendasLines, MARGIN + 5, y);
+                y += vendasLines.length * 4.5 + 3;
+
+                const vendasSync = [
+                    'Venda',
+                    'Vendedor: com a ressalva que serão enviados dados de vendedores que já foram sincronizados entre BLING-CPLUG',
+                    'Cliente: Se o CPF/CNPJ do cliente já existir na BLING, não será duplicado, será apenas vinculado ao cliente já existente',
+                    'Método de Pagamento',
+                    'Cancelamento de Vendas realizadas na CPLUG'
+                ];
+
+                doc.setFontSize(8);
+                for (const item of vendasSync) {
+                    await checkPageBreak(5);
+                    const lines = doc.splitTextToSize(`• ${item}`, PAGE_WIDTH - MARGIN * 2 - 15);
+                    doc.text(lines, MARGIN + 10, y);
+                    y += lines.length * 4;
+                }
+                y += 5;
+
+                // Sincronização de Cadastro de Clientes
+                await checkPageBreak(15);
+                doc.setFontSize(10);
+                doc.setFont(FONT_BOLD, 'bold');
+                if (darkGrayRgbBling) {
+                    doc.setTextColor(darkGrayRgbBling.r, darkGrayRgbBling.g, darkGrayRgbBling.b);
+                }
+                doc.text('SINCRONIZAÇÃO DE CADASTRO DE CLIENTES', MARGIN + 5, y);
+                y += 6;
+                doc.setFont(FONT_REGULAR, 'normal');
+                doc.setFontSize(9);
+                if (mediumGrayRgbBling) {
+                    doc.setTextColor(mediumGrayRgbBling.r, mediumGrayRgbBling.g, mediumGrayRgbBling.b);
+                }
+                
+                const clientesBlingText = 'Clientes cadastrados na BLING: Como a ideia da integração é possibilitar vendas em nosso PDV, os clientes de e-commerce da BLING não se fazem necessários em nosso ERP, dessa maneira nenhum cliente da BLING é sincronizado no ERP CPLUG.';
+                const clientesBlingLines = doc.splitTextToSize(clientesBlingText, PAGE_WIDTH - MARGIN * 2 - 10);
+                doc.text(clientesBlingLines, MARGIN + 5, y);
+                y += clientesBlingLines.length * 4.5 + 3;
+
+                const clientesCplugText = 'Clientes cadastrados na CPLUG: Somente clientes cadastrados na CPLUG são sincronizados para BLING, se o CPF/CNPJ do cliente já existir na BLING, não será duplicado, será apenas vinculado ao cliente já existente.';
+                const clientesCplugLines = doc.splitTextToSize(clientesCplugText, PAGE_WIDTH - MARGIN * 2 - 10);
+                doc.text(clientesCplugLines, MARGIN + 5, y);
+                y += clientesCplugLines.length * 4.5 + 5;
+
+                // Limitações
+                await checkPageBreak(20);
+                doc.setFontSize(11);
+                doc.setFont(FONT_BOLD, 'bold');
+                if (darkGrayRgbBling) {
+                    doc.setTextColor(darkGrayRgbBling.r, darkGrayRgbBling.g, darkGrayRgbBling.b);
+                }
+                doc.text('2. LIMITAÇÕES:', MARGIN, y);
+                y += 8;
+
+                const limitacoes = [
+                    'Controle de Estoque apenas na BLING: O objetivo da integração é que as vendas realizadas em nossos PONTOS DE VENDA sejam debitados do estoque da BLING, por esta razão o estoque não é controlado na CPLUG.',
+                    'Métodos de Pagamentos: Na sincronização não é realizado os vínculos entre os métodos de pagamentos entre ambas plataformas, sendo assim é obrigatório realizar um DE-PARA: vincular pagamentos CPLUG para pagamentos BLING.',
+                    'Parâmetros Tributários: A integração não exporta as NFC-e emitidas para o BLING, ficando em nosso ERP para acessa-las, fazer download.',
+                    'Imagens: As imagens do cadastro de produtos não é integrada, sendo necessário replicar manualmente a inserção de imagens descritivas.'
+                ];
+
+                doc.setFontSize(9);
+                doc.setFont(FONT_REGULAR, 'normal');
+                if (mediumGrayRgbBling) {
+                    doc.setTextColor(mediumGrayRgbBling.r, mediumGrayRgbBling.g, mediumGrayRgbBling.b);
+                }
+                for (const item of limitacoes) {
+                    await checkPageBreak(8);
+                    const lines = doc.splitTextToSize(`• ${item}`, PAGE_WIDTH - MARGIN * 2 - 10);
+                    doc.text(lines, MARGIN + 5, y);
+                    y += lines.length * 4.5;
+                }
+                y += 10;
+            }
+
             // Mensagem de Encerramento (Melhorado)
+            // Se for plano Bling, a mensagem já está na última página do Bling
+            // Se não for, precisa verificar se há espaço na página atual
+            if (!this.selectedPlan || this.selectedPlan.name !== 'Plano Bling') {
+                await checkPageBreak(25);
+            }
             drawBlueSeparator(doc, y);
             y += 10;
 
