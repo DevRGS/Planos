@@ -5,13 +5,14 @@ function quoteCalculator() {
         showDiscountModal: false, isDiscountAuthorized: false, discountPassword: '', discountPasswordError: false, 
         // Proteção da Data de Fechamento
         showClosingDateModal: false, isClosingDateAuthorized: false, closingDatePassword: '', closingDatePasswordError: false, tempClosingDate: '',
-        manualDiscountPercentage: 10, tempDiscountPercentage: 10, discountRuleError: '',
+        manualDiscountPercentage: 10, tempDiscountPercentage: 10, tempFinalValue: null, discountRuleError: '',
         // Código especial para desconto acima de 20%
         showSpecialCodeModal: false, specialCode: '', specialCodeError: false,
         courtesyModuleName: null,
         showLeadForm: false, leadCaptureSuccess: false, clientName: '', clientCPF: '', clientCNPJ: '', clientObservation: '', leadFormError: '',
         generatedCouponCode: '', annualSavings: 0, countdownTimer: null, countdownText: '',
         selectedYears: 1,
+        showPdfSuccess: false,
 
         noDiscountModules: new Set([
     // Defina aqui módulos que você não quer que recebam desconto
@@ -210,6 +211,27 @@ function quoteCalculator() {
             return this.selectedPlan.optionalModules.filter(mod => mod.name.toLowerCase().includes(this.searchQuery.toLowerCase()));
         },
 
+        get tempFinalTotal() {
+            if (!this.selectedPlan) return 0;
+            const base = this.selectedPlan.basePrice;
+            const addons = (this.selectedPlan.additionalUsers.count * this.selectedPlan.additionalUsers.price) + (this.selectedPlan.additionalPdvs.count * this.selectedPlan.additionalPdvs.price);
+            const optionals = this.selectedPlan.optionalModules.reduce((total, mod) => total + (mod.quantifiable ? mod.count * mod.price : (mod.selected ? mod.price : 0)), 0);
+            const subtotal = base + addons + optionals;
+            const courtesyValue = this.eligibleForCourtesy.find(m => m.name === this.courtesyModuleName)?.price || 0;
+            let amountEligibleForPercentageDiscount = base + addons;
+            this.selectedPlan.optionalModules.forEach(mod => {
+                if (!this.noDiscountModules.has(mod.name) && (mod.selected || mod.count > 0)) {
+                    amountEligibleForPercentageDiscount += mod.quantifiable ? mod.count * mod.price : mod.price;
+                }
+            });
+            if (courtesyValue > 0 && !this.noDiscountModules.has(this.courtesyModuleName)) {
+                amountEligibleForPercentageDiscount -= courtesyValue;
+            }
+            const calculatedDiscountAmount = amountEligibleForPercentageDiscount * (this.tempDiscountPercentage / 100);
+            const totalReduction = courtesyValue + calculatedDiscountAmount;
+            return subtotal - totalReduction;
+        },
+
         get summary() {
             if (!this.selectedPlan) return { base: 0, addons: 0, optionals: 0, setupCost: 0, subtotal: 0, courtesyValue: 0, calculatedDiscountAmount: 0, totalReduction: 0, finalTotal: 0, effectivePercentage: 0 };
             const base = this.selectedPlan.basePrice;
@@ -370,6 +392,7 @@ function quoteCalculator() {
 
         openDiscountModal() {
             this.tempDiscountPercentage = this.manualDiscountPercentage;
+            this.tempFinalValue = null;
             this.isDiscountAuthorized = false;
             this.discountPassword = '';
             this.discountRuleError = '';
@@ -383,8 +406,61 @@ function quoteCalculator() {
             } else { this.discountPasswordError = true; }
         },
 
+        calculateDiscountFromFinalValue() {
+            if (!this.selectedPlan || this.tempFinalValue === null || this.tempFinalValue === '') {
+                return;
+            }
+            
+            const finalValue = parseFloat(this.tempFinalValue);
+            if (isNaN(finalValue) || finalValue < 0) {
+                return;
+            }
+            
+            // Calcula o subtotal atual
+            const base = this.selectedPlan.basePrice;
+            const addons = (this.selectedPlan.additionalUsers.count * this.selectedPlan.additionalUsers.price) + (this.selectedPlan.additionalPdvs.count * this.selectedPlan.additionalPdvs.price);
+            const optionals = this.selectedPlan.optionalModules.reduce((total, mod) => total + (mod.quantifiable ? mod.count * mod.price : (mod.selected ? mod.price : 0)), 0);
+            const subtotal = base + addons + optionals;
+            
+            // Calcula o valor da cortesia
+            const courtesyValue = this.eligibleForCourtesy.find(m => m.name === this.courtesyModuleName)?.price || 0;
+            
+            // Calcula o valor elegível para desconto percentual
+            let amountEligibleForPercentageDiscount = base + addons;
+            this.selectedPlan.optionalModules.forEach(mod => {
+                if (!this.noDiscountModules.has(mod.name) && (mod.selected || mod.count > 0)) {
+                    amountEligibleForPercentageDiscount += mod.quantifiable ? mod.count * mod.price : mod.price;
+                }
+            });
+            
+            if (courtesyValue > 0 && !this.noDiscountModules.has(this.courtesyModuleName)) {
+                amountEligibleForPercentageDiscount -= courtesyValue;
+            }
+            
+            // Calcula o desconto necessário para chegar ao valor final
+            const totalReduction = subtotal - finalValue;
+            const calculatedDiscountAmount = totalReduction - courtesyValue;
+            
+            // Calcula a porcentagem de desconto
+            if (amountEligibleForPercentageDiscount > 0) {
+                this.tempDiscountPercentage = (calculatedDiscountAmount / amountEligibleForPercentageDiscount) * 100;
+            } else {
+                this.tempDiscountPercentage = 0;
+            }
+            
+            // Limita a porcentagem entre 0 e 100
+            if (this.tempDiscountPercentage < 0) this.tempDiscountPercentage = 0;
+            if (this.tempDiscountPercentage > 100) this.tempDiscountPercentage = 100;
+        },
+
         applyManualDiscount() {
             this.discountRuleError = '';
+            
+            // Se o usuário inseriu um valor final, calcula a porcentagem primeiro
+            if (this.tempFinalValue !== null && this.tempFinalValue !== '') {
+                this.calculateDiscountFromFinalValue();
+            }
+            
             if (this.tempDiscountPercentage > 20) {
                 this.discountRuleError = '🚫';
                 // Não mostra o modal automaticamente, apenas o botão no template
@@ -392,6 +468,7 @@ function quoteCalculator() {
             }
             if (this.tempDiscountPercentage < 0) this.tempDiscountPercentage = 0;
             this.manualDiscountPercentage = this.tempDiscountPercentage;
+            this.tempFinalValue = null; // Limpa o valor final após aplicar
             this.showDiscountModal = false;
             this.showSpecialCodeModal = false;
         },
@@ -402,8 +479,13 @@ function quoteCalculator() {
                 this.specialCodeError = true;
                 return false;
             }
+            // Se o usuário inseriu um valor final, calcula a porcentagem primeiro
+            if (this.tempFinalValue !== null && this.tempFinalValue !== '') {
+                this.calculateDiscountFromFinalValue();
+            }
             // Código válido, permite aplicar desconto acima de 20%
             this.manualDiscountPercentage = this.tempDiscountPercentage;
+            this.tempFinalValue = null; // Limpa o valor final após aplicar
             this.showDiscountModal = false;
             this.showSpecialCodeModal = false;
             this.specialCode = '';
@@ -1631,6 +1713,12 @@ Caso deseje, você poderá adquirir mais treinamentos com duração de 01h:30min
             
             const fileName = `Proposta-${this.clientName.replace(/ /g, '_')}-${generationDate}.pdf`;
             doc.save(fileName);
+            
+            // Mostra animação de sucesso
+            this.showPdfSuccess = true;
+            setTimeout(() => {
+                this.showPdfSuccess = false;
+            }, 3000); // Fecha automaticamente após 3 segundos
         },
 
 

@@ -78,8 +78,21 @@
                 </div>
                 <div class="space-y-4 my-6">
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 text-left">Desconto Manual (%)</label>
-                        <input type="number" x-model.number="tempDiscountPercentage" x-ref="discountPercentageInput" placeholder="%" class="form-input text-center">
+                        <label class="block text-sm font-medium text-gray-700 text-left mb-1">Desconto Manual (%)</label>
+                        <input type="number" x-model.number="tempDiscountPercentage" x-ref="discountPercentageInput" placeholder="%" step="0.01" min="0" max="100" class="form-input text-center" @input="tempFinalValue = null">
+                        <p class="text-xs text-gray-500 mt-1" x-show="!tempFinalValue || tempFinalValue === ''">
+                            Valor final calculado: <span class="font-semibold">R$ <span x-text="tempFinalTotal.toFixed(2).replace('.', ',')"></span></span>
+                        </p>
+                        <p class="text-xs text-gray-500 mt-1" x-show="tempFinalValue && tempFinalValue !== ''">
+                            Ou defina o valor final abaixo
+                        </p>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 text-left mb-1">Valor Final (R$)</label>
+                        <input type="number" x-model.number="tempFinalValue" placeholder="0.00" step="0.01" min="0" class="form-input text-center" @input="calculateDiscountFromFinalValue()">
+                        <p class="text-xs text-gray-500 mt-1" x-show="tempFinalValue && tempFinalValue !== ''">
+                            Desconto calculado: <span class="font-semibold" x-text="tempDiscountPercentage.toFixed(2).replace('.', ',')"></span>%
+                        </p>
                     </div>
                 </div>
                 
@@ -152,6 +165,14 @@
                     Cancelar
                 </button>
             </div>
+        </div>
+    </div>
+
+    <!-- Modal: Sucesso ao Gerar PDF -->
+    <div x-show="showPdfSuccess" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100" x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-95" class="fixed inset-0 flex items-center justify-center z-50" style="background-color: rgba(0, 0, 0, 0.5);">
+        <div class="bg-white p-8 rounded-2xl shadow-2xl text-center" style="background-color: #fafcf9;">
+            <img src="https://media.tenor.com/Hw7f-4l0zgEAAAAM/check-green.gif" alt="Check verde" class="mx-auto mb-4" style="width: 120px; height: 120px;">
+            <h2 class="text-2xl font-bold text-gray-800">Proposta Gerada</h2>
         </div>
     </div>
 
