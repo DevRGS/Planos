@@ -13,6 +13,7 @@ function quoteCalculator() {
         generatedCouponCode: '', annualSavings: 0, countdownTimer: null, countdownText: '',
         selectedYears: 1,
         showPdfSuccess: false,
+        showDiscountSuccess: false,
 
         noDiscountModules: new Set([
     // Defina aqui módulos que você não quer que recebam desconto
@@ -461,11 +462,18 @@ function quoteCalculator() {
                 this.calculateDiscountFromFinalValue();
             }
             
+            // Verifica se há cortesia selecionada
+            const hasCourtesy = this.courtesyModuleName !== null && this.courtesyModuleName !== '';
+            
+            // Se desconto > 20%, requer autorização (com ou sem cortesia)
+            // Com cortesia: desconto máximo permitido sem autorização é 20%
+            // Sem cortesia: desconto máximo permitido sem autorização é 20%
             if (this.tempDiscountPercentage > 20) {
                 this.discountRuleError = '🚫';
                 // Não mostra o modal automaticamente, apenas o botão no template
                 return;
             }
+            
             if (this.tempDiscountPercentage < 0) this.tempDiscountPercentage = 0;
             this.manualDiscountPercentage = this.tempDiscountPercentage;
             this.tempFinalValue = null; // Limpa o valor final após aplicar
@@ -489,6 +497,13 @@ function quoteCalculator() {
             this.showDiscountModal = false;
             this.showSpecialCodeModal = false;
             this.specialCode = '';
+            
+            // Mostra popup de sucesso
+            this.showDiscountSuccess = true;
+            setTimeout(() => {
+                this.showDiscountSuccess = false;
+            }, 3000); // Fecha automaticamente após 3 segundos
+            
             return true;
         },
 
