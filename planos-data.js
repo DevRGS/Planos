@@ -107,7 +107,7 @@ const PLAN_DATA = {
                 { name: 'Programa de Fidelidade', price: 299.90, setupCost: 1000.00, quantifiable: false, selected: false },
                 { name: 'Painel Senha', price: 49.90, quantifiable: false, selected: false },
                 { name: 'Relatório Dinâmico', price: 50.00, quantifiable: false, selected: false },
-               //{ name: 'Backup Realtime', price: 199.00, quantifiable: false, selected: false },
+                { name: 'Backup Realtime', price: 199.00, quantifiable: false, selected: false },
                 { name: 'Business Intelligence (BI)', price: 199.00, quantifiable: false, selected: false },
                 { name: 'App Gestão CPlug', price: 20.00, quantifiable: false, selected: false },
                 { name: 'Marketing', price: 24.50, quantifiable: false, selected: false },
@@ -177,5 +177,6 @@ const PLAN_DATA = {
         }
     }
 };
+
 
 
