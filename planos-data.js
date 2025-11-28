@@ -123,6 +123,8 @@ const PLAN_DATA = {
             additionalUsers: { count: 0, price: 19.90, max: 5 },
             additionalPdvs: { count: 0, price: 59.90, max: 5 },
             optionalModules: [
+                { name: 'TEF', price: 99.90, quantifiable: true, count: 0 },
+                { name: 'Smart TEF', price: 49.90, quantifiable: true, count: 0 },
                 { name: 'Hub de Delivery', price: 79.90, quantifiable: false, selected: false, requires: ['Delivery'] },
                 { name: 'Delivery Direto Básico', price: 99.00, quantifiable: false, selected: false, requires: ['Hub de Delivery'] },
                 { name: 'Delivery Direto Profissional', price: 200.00, quantifiable: false, selected: false, requires: ['Hub de Delivery'] },
@@ -175,4 +177,5 @@ const PLAN_DATA = {
         }
     }
 };
+
 
