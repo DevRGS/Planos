@@ -28,7 +28,7 @@ const PLAN_DATA = {
             optionalModules: [
                 { name: 'TEF', price: 99.90, quantifiable: true, count: 0 },
                 { name: 'Smart TEF', price: 49.90, quantifiable: true, count: 0 },
-                { name: 'Autoatendimento', price: 299.00, quantifiable: true, count: 0 },
+                { name: 'Autoatendimento', price: 299.90, quantifiable: true, count: 0 },
                 { name: 'Facilita NFE', price: 99.00, quantifiable: false, selected: false },
                 { name: 'Conciliação Bancária', price: 50.00, quantifiable: false, selected: false },
                 { name: 'Contratos de cartões', price: 50.00, quantifiable: false, selected: false },
@@ -68,7 +68,7 @@ const PLAN_DATA = {
                 { name: 'Backup Realtime', price: 99.00, quantifiable: false, selected: false },
                 { name: 'Cardápio digital', price: 99.00, quantifiable: false, selected: false },
                 { name: 'Smart Menu', price: 99.00, quantifiable: false, selected: false },
-                { name: 'Autoatendimento', price: 299.00, quantifiable: true, count: 0 },
+                { name: 'Autoatendimento', price: 299.90, quantifiable: true, count: 0 },
             ]
         }
     },
@@ -100,7 +100,7 @@ const PLAN_DATA = {
                 { name: 'Delivery Direto VIP', price: 300.00, quantifiable: false, selected: false, requires: ['Hub de Delivery'] },
                 { name: 'TEF', price: 99.90, quantifiable: true, count: 0 },
                 { name: 'Smart TEF', price: 49.90, quantifiable: true, count: 0 },
-                { name: 'Autoatendimento', price: 299.00, quantifiable: true, count: 0 },
+                { name: 'Autoatendimento', price: 299.90, quantifiable: true, count: 0 },
                 { name: 'Integração API', price: 199.90, quantifiable: false, selected: false },
                 { name: 'Suporte Técnico - Estendido', price: 99.00, quantifiable: false, selected: false },
                 { name: 'Conciliação Bancária', price: 50.00, quantifiable: false, selected: false },
@@ -157,7 +157,7 @@ const PLAN_DATA = {
                 { name: 'Delivery', price: 30.00, quantifiable: false, selected: false },
                 { name: 'TEF', price: 99.90, quantifiable: true, count: 0, max: Infinity },
                 { name: 'Smart TEF', price: 49.90, quantifiable: true, count: 0, max: Infinity },
-                { name: 'Autoatendimento', price: 299.00, quantifiable: true, count: 0, max: Infinity },
+                { name: 'Autoatendimento', price: 299.90, quantifiable: true, count: 0, max: Infinity },
             ]
         },
         autoatendimento: {
@@ -172,7 +172,7 @@ const PLAN_DATA = {
                 { name: 'Estoque em Grade', price: 40.00, quantifiable: false, selected: false },
                 { name: 'Business Intelligence (BI)', price: 199.00, quantifiable: false, selected: false },
                 { name: 'Atualização em Tempo Real', price: 49.00, quantifiable: false, selected: false },
-                { name: 'Autoatendimento', price: 299.00, quantifiable: true, count: 0, max: Infinity },
+                { name: 'Autoatendimento', price: 299.90, quantifiable: true, count: 0, max: Infinity },
             ]
         }
     }
