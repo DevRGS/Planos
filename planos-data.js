@@ -54,7 +54,7 @@ const PLAN_DATA = {
         },
         performance: {
             name: 'Plano Performance', basePrice: 443.33, baseUsers: 5, basePdvs: 2,
-            fixedModules: ['5x Usuários', '2x PDV - Frente de Caixa', '3x Smart TEF', 'Produção', 'Promoções', 'Notas Fiscais Ilimitadas', 'Importação de XML', 'Hub de Delivery', 'Ordem de Serviço', 'Delivery', 'App Gestão CPlug', 'Relatório KDS', 'Painel Senha TV', 'Painel Senha Mobile', 'Controle de Mesas', 'Estoque em Grade', 'Marketing', 'Relatório Básico', 'Relatório Dinâmico', 'Atualização em Tempo Real', 'Facilita NFE', 'Conciliação Bancária', 'Contratos de cartões e outros', 'Suporte Técnico Completo (Todos os canais)'],
+            fixedModules: ['5x Usuários', '2x PDV - Frente de Caixa', '2x Smart TEF', 'Produção', 'Promoções', 'Notas Fiscais Ilimitadas', 'Importação de XML', 'Hub de Delivery', 'Ordem de Serviço', 'Delivery', 'App Gestão CPlug', 'Relatório KDS', 'Painel Senha TV', 'Painel Senha Mobile', 'Controle de Mesas', 'Estoque em Grade', 'Marketing', 'Relatório Básico', 'Relatório Dinâmico', 'Atualização em Tempo Real', 'Facilita NFE', 'Conciliação Bancária', 'Contratos de cartões e outros', 'Suporte Técnico Completo (Todos os canais)'],
             additionalUsers: { count: 0, price: 19.90, max: 5 }, additionalPdvs: { count: 0, price: 59.90, max: 5 },
             optionalModules: [
                 { name: 'Delivery Direto Básico', price: 99.00, quantifiable: false, selected: false, requires: ['Hub de Delivery'] },
@@ -119,7 +119,7 @@ const PLAN_DATA = {
         },
         performance: {
             name: 'Plano Performance', basePrice: 443.33, baseUsers: 5, basePdvs: 2,
-            fixedModules: ['5x Usuários', '2x PDV - Frente de Caixa', '3x Smart TEF', 'Produção', 'Promoções', 'Notas Fiscais Ilimitadas', 'Importação de XML', 'Ordem de Serviço', 'App Gestão CPlug', 'Painel de Senha TV', 'Painel de Senha Mobile', 'Controle de Mesas', 'Delivery','Estoque em Grade', 'Marketing', 'Relatórios, Financeiro e Estoque', 'Relatório Dinâmico', 'Atualização em Tempo Real', 'Facilita NFE', 'Conciliação Bancária', 'Contratos de cartões e outros', 'Suporte Técnico Completo (Todos os canais)'],
+            fixedModules: ['5x Usuários', '2x PDV - Frente de Caixa', '2x Smart TEF', 'Produção', 'Promoções', 'Notas Fiscais Ilimitadas', 'Importação de XML', 'Ordem de Serviço', 'App Gestão CPlug', 'Painel de Senha TV', 'Painel de Senha Mobile', 'Controle de Mesas', 'Delivery','Estoque em Grade', 'Marketing', 'Relatórios, Financeiro e Estoque', 'Relatório Dinâmico', 'Atualização em Tempo Real', 'Facilita NFE', 'Conciliação Bancária', 'Contratos de cartões e outros', 'Suporte Técnico Completo (Todos os canais)'],
             additionalUsers: { count: 0, price: 19.90, max: 5 },
             additionalPdvs: { count: 0, price: 59.90, max: 5 },
             optionalModules: [
