@@ -57,6 +57,7 @@ const PLAN_DATA = {
             fixedModules: ['5x Usuários', '2x PDV - Frente de Caixa', '2x Smart TEF', 'Produção', 'Promoções', 'Notas Fiscais Ilimitadas', 'Importação de XML', 'Hub de Delivery', 'Ordem de Serviço', 'Delivery', 'App Gestão CPlug', 'Relatório KDS', 'Painel Senha TV', 'Painel Senha Mobile', 'Controle de Mesas', 'Estoque em Grade', 'Marketing', 'Relatório Básico', 'Relatório Dinâmico', 'Atualização em Tempo Real', 'Facilita NFE', 'Conciliação Bancária', 'Contratos de cartões e outros', 'Suporte Técnico Completo (Todos os canais)'],
             additionalUsers: { count: 0, price: 19.90, max: 5 }, additionalPdvs: { count: 0, price: 59.90, max: 5 },
             optionalModules: [
+                { name: 'Autoatendimento', price: 299.90, quantifiable: true, count: 0 },
                 { name: 'Delivery Direto Básico', price: 99.00, quantifiable: false, selected: false, requires: ['Hub de Delivery'] },
                 { name: 'Delivery Direto Profissional', price: 200.00, quantifiable: false, selected: false, requires: ['Hub de Delivery'] },
                 { name: 'Delivery Direto VIP', price: 300.00, quantifiable: false, selected: false, requires: ['Hub de Delivery'] },
@@ -66,9 +67,8 @@ const PLAN_DATA = {
                 { name: 'Integração API', price: 299.00, quantifiable: false, selected: false },
                 { name: 'Business Intelligence (BI)', price: 99.00, quantifiable: false, selected: false },
                 { name: 'Backup Realtime', price: 99.00, quantifiable: false, selected: false },
-                { name: 'Cardápio digital', price: 99.00, quantifiable: false, selected: false },
+                { name: 'Cardápio digital', price: 99.00, quantifiable: false, selected: false },  
                 { name: 'Smart Menu', price: 99.00, quantifiable: false, selected: false },
-                { name: 'Autoatendimento', price: 299.90, quantifiable: true, count: 0 },
             ]
         }
     },
@@ -93,14 +93,14 @@ const PLAN_DATA = {
             fixedModules: ['3x Usuários', '1x PDV - Frente de Caixa', 'Notas Fiscais Ilimitadas', 'Importação de XML', 'Estoque em Grade', 'Financeiro, Estoque e Relatórios', 'Suporte Técnico - Via Chat', 'Facilita NFE', 'Contratos de cartões e outros', 'Promoções'],
             additionalUsers: { count: 0, price: 19.90, max: 2 }, additionalPdvs: { count: 0, price: 59.90, max: 2 },
             optionalModules: [
+                { name: 'TEF', price: 99.90, quantifiable: true, count: 0 },
+                { name: 'Smart TEF', price: 49.90, quantifiable: true, count: 0 },
+                { name: 'Autoatendimento', price: 299.90, quantifiable: true, count: 0 },
                 { name: 'Delivery', price: 30.00, quantifiable: false, selected: false },
                 { name: 'Hub de Delivery', price: 79.90, quantifiable: false, selected: false, requires: ['Delivery'] },
                 { name: 'Delivery Direto Básico', price: 99.00, quantifiable: false, selected: false, requires: ['Hub de Delivery'] },
                 { name: 'Delivery Direto Profissional', price: 200.00, quantifiable: false, selected: false, requires: ['Hub de Delivery'] },
                 { name: 'Delivery Direto VIP', price: 300.00, quantifiable: false, selected: false, requires: ['Hub de Delivery'] },
-                { name: 'TEF', price: 99.90, quantifiable: true, count: 0 },
-                { name: 'Smart TEF', price: 49.90, quantifiable: true, count: 0 },
-                { name: 'Autoatendimento', price: 299.90, quantifiable: true, count: 0 },
                 { name: 'Integração API', price: 199.90, quantifiable: false, selected: false },
                 { name: 'Suporte Técnico - Estendido', price: 99.00, quantifiable: false, selected: false },
                 { name: 'Conciliação Bancária', price: 50.00, quantifiable: false, selected: false },
@@ -125,6 +125,7 @@ const PLAN_DATA = {
             optionalModules: [
                 { name: 'TEF', price: 99.90, quantifiable: true, count: 0 },
                 { name: 'Smart TEF', price: 49.90, quantifiable: true, count: 0 },
+                { name: 'Autoatendimento', price: 299.90, quantifiable: true, count: 0 },
                 { name: 'Hub de Delivery', price: 79.90, quantifiable: false, selected: false, requires: ['Delivery'] },
                 { name: 'Delivery Direto Básico', price: 99.00, quantifiable: false, selected: false, requires: ['Hub de Delivery'] },
                 { name: 'Delivery Direto Profissional', price: 200.00, quantifiable: false, selected: false, requires: ['Hub de Delivery'] },
