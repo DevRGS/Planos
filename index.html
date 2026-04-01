@@ -3,29 +3,34 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#0f172a">
     <title>Calculadora de Orçamento CPlug</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
     <script src="planos-data.js"></script>
     <script src="planos.js" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
-<body class="bg-gray-50 text-gray-800" x-data="quoteCalculator()" x-cloak>
+<body class="app-body text-gray-800" x-data="quoteCalculator()" x-cloak>
 
-    <div x-show="!loggedIn" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-50">
-        <div class="bg-white p-8 rounded-2xl shadow-2xl w-full max-w-sm text-center" @keyup.enter="login()">
-            <h2 class="text-2xl font-bold text-gray-800">Acesso Restrito</h2>
-            <p class="text-gray-600 mt-2 mb-6">Por favor, insira a senha para continuar.</p>
-            <input type="password" x-model="password" x-ref="loginPasswordInput" placeholder="••••••••" class="w-full text-center text-lg p-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
+    <div x-show="!loggedIn" class="fixed inset-0 backdrop-scrim flex items-center justify-center z-50 p-4">
+        <div class="bg-white p-8 sm:p-10 rounded-2xl shadow-2xl w-full max-w-sm text-center border border-slate-200 card-elevated" @keyup.enter="login()">
+            <p class="text-xs font-semibold uppercase tracking-widest text-slate-500 mb-2">ConnectPlug</p>
+            <h2 class="text-2xl font-bold text-slate-900">Acesso restrito</h2>
+            <p class="text-slate-600 mt-2 mb-6 text-sm leading-relaxed">Insira a senha para abrir a calculadora de orçamento.</p>
+            <input type="password" x-model="password" x-ref="loginPasswordInput" placeholder="••••••••" class="w-full text-center text-lg p-3 border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition bg-slate-50">
             <p x-show="loginError" class="text-red-500 text-sm mt-2">Por favor, insira uma senha.</p>
-            <button @click="login()" class="w-full bg-blue-600 text-white font-bold py-3 rounded-lg hover:bg-blue-700 transition mt-6">
+            <button type="button" @click="login()" class="w-full bg-blue-600 text-white font-bold py-3 rounded-xl hover:bg-blue-700 transition mt-6 shadow-md hover:shadow-lg cursor-pointer">
                 Entrar
             </button>
         </div>
     </div>
     
-    <div x-show="showDiscountModal" class="modal fixed inset-0 flex items-center justify-center z-50" @click.away="showDiscountModal = false" @keydown.escape.window="showDiscountModal = false">
-        <div class="bg-white p-8 rounded-2xl shadow-2xl w-full max-w-md text-center" @click.stop>
+    <div x-show="showDiscountModal" class="modal fixed inset-0 flex items-center justify-center z-50 p-4" @click.away="showDiscountModal = false" @keydown.escape.window="showDiscountModal = false">
+        <div class="bg-white p-8 rounded-2xl shadow-2xl w-full max-w-md text-center border border-slate-200 card-elevated max-h-90vh overflow-y-auto" @click.stop>
             <div x-show="!isDiscountAuthorized">
                 <h2 class="text-2xl font-bold text-gray-800">Autorizar Desconto</h2>
                 <p class="text-gray-600 mt-2 mb-6">Insira a senha para editar o desconto.</p>
@@ -92,8 +97,8 @@
     </div>
 
     <!-- Modal: Autorizar edição da Data de Fechamento -->
-    <div x-show="showClosingDateModal" class="modal fixed inset-0 flex items-center justify-center z-50" @click.away="showClosingDateModal = false" @keydown.escape.window="showClosingDateModal = false">
-        <div class="bg-white p-8 rounded-2xl shadow-2xl w-full max-w-md text-center" @click.stop>
+    <div x-show="showClosingDateModal" class="modal fixed inset-0 flex items-center justify-center z-50 p-4" @click.away="showClosingDateModal = false" @keydown.escape.window="showClosingDateModal = false">
+        <div class="bg-white p-8 rounded-2xl shadow-2xl w-full max-w-md text-center border border-slate-200 card-elevated" @click.stop>
             <div x-show="!isClosingDateAuthorized">
                 <h2 class="text-2xl font-bold text-gray-800">Autorizar Data de Fechamento</h2>
                 <p class="text-gray-600 mt-2 mb-6">Insira a senha para editar a data.</p>
@@ -115,8 +120,8 @@
     </div>
 
     <!-- Modal: Código Especial para Desconto > 20% -->
-    <div x-show="showSpecialCodeModal" class="modal fixed inset-0 flex items-center justify-center z-50" @click.away="showSpecialCodeModal = false" @keydown.escape.window="showSpecialCodeModal = false">
-        <div class="bg-white p-8 rounded-2xl shadow-2xl w-full max-w-md text-center" @click.stop>
+    <div x-show="showSpecialCodeModal" class="modal fixed inset-0 flex items-center justify-center z-50 p-4" @click.away="showSpecialCodeModal = false" @keydown.escape.window="showSpecialCodeModal = false">
+        <div class="bg-white p-8 rounded-2xl shadow-2xl w-full max-w-md text-center border border-slate-200 card-elevated" @click.stop>
             <h2 class="text-2xl font-bold text-gray-800">Código Especial</h2>
             <p class="text-gray-600 mt-2 mb-6">Solicite para o Gerente o Cupom de Desconto para validar</p>
             <input type="text" x-model="specialCode" x-ref="specialCodeInput" @keydown.enter.prevent="validateSpecialCode()" placeholder="Digite o código" class="form-input text-center">
@@ -148,54 +153,91 @@
         </div>
     </div>
 
-    <div x-show="loggedIn" :class="{'pb-72': selectedPlan}" class="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
-        <header class="text-center mb-16">
-            <h1 class="text-6xl md:text-6xl font-extrabold bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent leading-tight pb-2">Orçamento CPlug</h1>
-            <p class="text-lg text-gray-500 max-w-2xl mx-auto leading-relaxed">Selecione um segmento, um plano, personalize os módulos e calcule o valor final.</p>
+    <div x-show="loggedIn" :class="{'pb-72': selectedPlan}" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10">
+        <header class="text-center mb-12 sm:mb-16">
+            <p class="text-xs font-semibold uppercase tracking-widest text-slate-500 mb-3">ConnectPlug</p>
+            <h1 class="text-4xl sm:text-5xl md:text-6xl font-extrabold bg-gradient-to-r from-blue-600 to-slate-900 bg-clip-text text-transparent leading-tight pb-3">Orçamento CPlug</h1>
+            <p class="text-base sm:text-lg text-slate-600 max-w-2xl mx-auto leading-relaxed mt-2" x-show="!marketSegment">Selecione <strong class="font-semibold text-slate-800">Food</strong>, <strong class="font-semibold text-slate-800">Varejo</strong> ou <strong class="font-semibold text-slate-800">Outros</strong> para visualizar os planos e montar o orçamento.</p>
+            <p class="text-base sm:text-lg text-slate-600 max-w-2xl mx-auto leading-relaxed mt-2" x-show="marketSegment === 'food'">Escolha a família e o nível do plano, personalize os módulos e calcule o valor final.</p>
+            <p class="text-base sm:text-lg text-slate-600 max-w-2xl mx-auto leading-relaxed mt-2" x-show="marketSegment === 'varejo'">Escolha entre PDV Básico, Plano Gestão ou Plano Performance e personalize os módulos.</p>
+            <p class="text-base sm:text-lg text-slate-600 max-w-2xl mx-auto leading-relaxed mt-2" x-show="marketSegment === 'outros'">Escolha entre Plano Bling ou Autoatendimento e personalize os módulos.</p>
         </header>
 
-        <section id="plan-selection" class="mb-16">
-            <h2 class="text-2xl font-bold mb-8 text-center text-gray-800">1. Escolha o Segmento e o Plano Base</h2>
-            
-            <div class="flex justify-center mb-12">
-                <div class="inline-flex space-x-1 bg-gray-100 p-1.5 rounded-2xl shadow-inner">
-                    <button @click="setSegment('food')" :class="{'bg-white text-blue-600 shadow-md': selectedSegment === 'food', 'text-gray-500 hover:text-gray-700': selectedSegment !== 'food'}" class="py-2.5 px-8 rounded-xl font-semibold transition-all duration-200 cursor-pointer">
-                        Food Service
-                    </button>
-                    <button @click="setSegment('varejo')" :class="{'bg-white text-blue-600 shadow-md': selectedSegment === 'varejo', 'text-gray-500 hover:text-gray-700': selectedSegment !== 'varejo'}" class="py-2.5 px-8 rounded-xl font-semibold transition-all duration-200 cursor-pointer">
-                        Varejo
-                    </button>
-                    <button @click="setSegment('outros')" :class="{'bg-white text-blue-600 shadow-md': selectedSegment === 'outros', 'text-gray-500 hover:text-gray-700': selectedSegment !== 'outros'}" class="py-2.5 px-8 rounded-xl font-semibold transition-all duration-200 cursor-pointer">
-                        Outros
-                    </button>
-                </div>
+        <section id="plan-selection" class="mb-12 sm:mb-16">
+            <div class="text-center mb-8" x-show="!marketSegment">
+                <span class="section-eyebrow">Passo 1</span>
+                <h2 class="section-title text-gray-900">Escolha o mercado</h2>
             </div>
-            
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 md:items-stretch mb-2">
-                <div></div>
-                <div></div>
-                <div>
-                    <template x-for="(plan, key) in planData[selectedSegment]" :key="'badge-' + key">
-                        <template x-if="plan.name === 'Plano Performance'">
-                            <div class="plan-badges-top">
-                                <span class="plan-badge plan-badge-primary">Mais escolhido</span>
-                                <span class="plan-badge plan-badge-secondary">Desconto este mês</span>
-                            </div>
-                        </template>
-                    </template>
-                </div>
+            <div class="text-center mb-8" x-show="marketSegment === 'food'">
+                <span class="section-eyebrow">Passo 1</span>
+                <h2 class="section-title text-gray-900">Família de planos e nível</h2>
+            </div>
+            <div class="text-center mb-8" x-show="marketSegment === 'varejo'">
+                <span class="section-eyebrow">Passo 1</span>
+                <h2 class="section-title text-gray-900">Plano Varejo</h2>
+            </div>
+            <div class="text-center mb-8" x-show="marketSegment === 'outros'">
+                <span class="section-eyebrow">Passo 1</span>
+                <h2 class="section-title text-gray-900">Plano Bling ou Autoatendimento</h2>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 md:items-stretch">
-                <template x-for="(plan, key) in planData[selectedSegment]" :key="key">
+            <div class="flex flex-wrap justify-center gap-4 market-row-bottom">
+                    <button type="button" @click="setMarketSegment('food')"
+                        class="market-pill rounded-xl border-2 transition-all duration-200 focus:outline-none focus-visible:ring-4 focus-visible:ring-blue-200 cursor-pointer"
+                        :class="marketSegment === 'food' ? 'border-blue-500 bg-white shadow-lg ring-2 ring-blue-100' : 'border-slate-200 bg-white hover:border-blue-300 hover:shadow-md'">
+                        <svg class="w-5 h-5 text-blue-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M15.362 5.214A8.252 8.252 0 0112 21 8.25 8.25 0 016.038 7.048 8.287 8.287 0 009 9.6a8.983 8.983 0 013.361-6.867 8.21 8.21 0 003 2.48z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M12 18a3.75 3.75 0 00.495-7.467 5.99 5.99 0 00-1.925 3.546 5.975 5.975 0 01-2.133-1A3.75 3.75 0 0012 18z"/></svg>
+                        <span class="text-base font-extrabold text-slate-900 tracking-tight">Food</span>
+                    </button>
+                    <button type="button" @click="setMarketSegment('varejo')"
+                        class="market-pill rounded-xl border-2 transition-all duration-200 focus:outline-none focus-visible:ring-4 focus-visible:ring-blue-200 cursor-pointer"
+                        :class="marketSegment === 'varejo' ? 'border-blue-500 bg-white shadow-lg ring-2 ring-blue-100' : 'border-slate-200 bg-white hover:border-blue-300 hover:shadow-md'">
+                        <svg class="w-5 h-5 text-blue-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007zM8.625 10.5a.375.375 0 11-.75 0 .375.375 0 01.75 0zm7.5 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z"/></svg>
+                        <span class="text-base font-extrabold text-slate-900 tracking-tight">Varejo</span>
+                    </button>
+                    <button type="button" @click="setMarketSegment('outros')"
+                        class="market-pill rounded-xl border-2 transition-all duration-200 focus:outline-none focus-visible:ring-4 focus-visible:ring-blue-200 cursor-pointer"
+                        :class="marketSegment === 'outros' ? 'border-blue-500 bg-white shadow-lg ring-2 ring-blue-100' : 'border-slate-200 bg-white hover:border-blue-300 hover:shadow-md'">
+                        <svg class="w-5 h-5 text-blue-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25A2.25 2.25 0 0113.5 8.25V6zM3.75 15.75a2.25 2.25 0 012.25-2.25h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25v-2.25z"/></svg>
+                        <span class="text-base font-extrabold text-slate-900 tracking-tight">Outros</span>
+                    </button>
+            </div>
+
+            <div x-show="marketSegment === 'food'" x-transition>
+            <div class="flex flex-wrap justify-center gap-4 mb-12 market-row-bottom max-w-5xl mx-auto px-1">
+                <template x-for="seg in planFamilies" :key="seg.id">
+                    <button type="button" @click="setSegment(seg.id)"
+                        class="market-pill plan-family-pill rounded-xl border-2 transition-all duration-200 focus:outline-none focus-visible:ring-4 focus-visible:ring-blue-200 cursor-pointer"
+                        :class="selectedSegment === seg.id ? 'border-blue-500 bg-white shadow-lg ring-2 ring-blue-100' : 'border-slate-200 bg-white hover:border-blue-300 hover:shadow-md'">
+                        <svg x-show="seg.id === 'balcao'" class="w-5 h-5 text-blue-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M13.5 21v-7.5a.75.75 0 01.75-.75h3a.75.75 0 01.75.75V21m-4.5 0H2.36m11.14 0H20m0 0h3a.75.75 0 01.75.75V21m-4.5 0H2.36M19.5 3h-3.75a.75.75 0 01-.75-.75V0m0 0H2.25A2.25 2.25 0 000 2.25v15.75A2.25 2.25 0 002.25 21h15.75A2.25 2.25 0 0021 18.75V2.25A2.25 2.25 0 0018.75 0H3.75z"/></svg>
+                        <svg x-show="seg.id === 'delivery'" class="w-5 h-5 text-blue-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M8.25 18.75a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 01-1.125-1.125v-1.5c0-.621.504-1.125 1.125-1.125v-1.5c0-.621.504-1.125 1.125-1.125h3.75c.621 0 1.125.504 1.125 1.125v1.5c.621 0 1.125.504 1.125 1.125v1.5c0 .621-.504 1.125-1.125 1.125h-1.5m-9-6h7.5m-7.5 0L3 4.5M3 4.5l2.25-1.5M3 4.5l2.25 1.5M3 4.5v3.75m0 0h3.75m-3.75 0 2.25 1.5M3 8.25v3.75m0 0h3.75m-3.75 0 2.25 1.5"/></svg>
+                        <svg x-show="seg.id === 'deliveryBalcao'" class="w-5 h-5 text-blue-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M7.5 21L3 16.5m0 0L7.5 12M3 16.5h13.5m0-13.5L21 7.5m0 0L16.5 12M21 7.5H7.5"/></svg>
+                        <span class="text-sm sm:text-base font-extrabold text-slate-900 tracking-tight text-center leading-snug" x-text="seg.label"></span>
+                    </button>
+                </template>
+            </div>
+            
+            <div class="grid grid-cols-1 gap-6 md:items-stretch mb-2" :class="selectedSegment === 'outros' ? 'md:grid-cols-2' : 'md:grid-cols-3'">
+                <template x-for="(plan, key) in planData.food[selectedSegment]" :key="'badge-' + key">
+                    <div class="min-h-12 flex justify-center items-start">
+                        <template x-if="plan.highlight">
+                            <div class="plan-badges-top">
+                                <span class="plan-badge plan-badge-primary">Mais Escolhido</span>
+                            </div>
+                        </template>
+                    </div>
+                </template>
+            </div>
+
+            <div class="grid grid-cols-1 gap-6 md:items-stretch" :class="selectedSegment === 'outros' ? 'md:grid-cols-2' : 'md:grid-cols-3'">
+                <template x-for="(plan, key) in planData.food[selectedSegment]" :key="key">
                     <div>
-                        <div @click="selectPlan(key)" class="plan-card relative cursor-pointer bg-white p-8 rounded-3xl shadow-sm border border-gray-100 flex flex-col transition-all duration-300 hover:shadow-xl hover:-translate-y-1" :class="{'selected shadow-xl border-blue-500 ring-4 ring-blue-100': selectedPlanKey === key, 'best-value-card': plan.name === 'Plano Performance'}">
+                        <div @click="selectPlan(key)" class="plan-card relative cursor-pointer bg-white p-8 rounded-3xl shadow-sm border border-slate-200 flex flex-col transition-all duration-300 hover:shadow-xl" :class="{'selected shadow-xl border-blue-500 ring-4 ring-blue-100': selectedPlanKey === key, 'best-value-card': plan.highlight}">
                             <h3 class="text-2xl font-bold text-gray-900 mb-3" x-text="plan.name"></h3>
                         <p class="text-sm text-gray-400 uppercase tracking-wide font-semibold mb-6 pb-4 border-b border-gray-100">Módulos inclusos</p>
                         <ul class="space-y-3 text-gray-900 flex-grow text-sm">
                             <template x-for="item in plan.fixedModules" :key="item">
                                 <li class="flex items-start">
-                                    <svg class="w-5 h-5 text-emerald-500 mr-3 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>
+                                    <svg class="w-5 h-5 text-emerald-500 mr-3 flex-shrink-0 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>
                                     <span class="leading-relaxed" x-text="item"></span>
                                 </li>
                             </template>
@@ -204,13 +246,90 @@
                     </div>
                 </template>
             </div>
+            </div>
+
+            <div x-show="marketSegment === 'varejo'" x-transition>
+            <div class="grid grid-cols-1 gap-6 md:grid-cols-3 md:items-stretch mb-2">
+                <template x-for="opt in varejoPlanOptions" :key="'vbadge-' + opt.id">
+                    <div class="min-h-12 flex justify-center items-start">
+                        <template x-if="planData.varejo[opt.id].highlight">
+                            <div class="plan-badges-top">
+                                <span class="plan-badge plan-badge-primary">Mais Escolhido</span>
+                            </div>
+                        </template>
+                    </div>
+                </template>
+            </div>
+            <div class="grid grid-cols-1 gap-6 md:grid-cols-3 md:items-stretch">
+                <template x-for="opt in varejoPlanOptions" :key="opt.id">
+                    <div>
+                        <div @click="setSegment(opt.id)" class="plan-card relative cursor-pointer bg-white p-8 rounded-3xl shadow-sm border border-slate-200 flex flex-col transition-all duration-300 hover:shadow-xl" :class="{'selected shadow-xl border-blue-500 ring-4 ring-blue-100': marketSegment === 'varejo' && selectedSegment === opt.id, 'best-value-card': planData.varejo[opt.id].highlight}">
+                            <h3 class="text-2xl font-bold text-gray-900 mb-3" x-text="planData.varejo[opt.id].name"></h3>
+                        <p class="text-sm text-gray-400 uppercase tracking-wide font-semibold mb-6 pb-4 border-b border-gray-100">Módulos inclusos</p>
+                        <ul class="space-y-3 text-gray-900 flex-grow text-sm">
+                            <template x-for="item in planData.varejo[opt.id].fixedModules" :key="item">
+                                <li class="flex items-start">
+                                    <svg class="w-5 h-5 text-emerald-500 mr-3 flex-shrink-0 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>
+                                    <span class="leading-relaxed" x-text="item"></span>
+                                </li>
+                            </template>
+                        </ul>
+                        </div>
+                    </div>
+                </template>
+            </div>
+            </div>
+
+            <div x-show="marketSegment === 'outros'" x-transition>
+            <div class="grid grid-cols-1 gap-6 md:grid-cols-3 md:items-stretch mb-2">
+                <template x-for="opt in outrosPlanOptions" :key="'obadge-' + opt.id">
+                    <div class="min-h-12 flex justify-center items-start">
+                        <template x-if="planData.food.outros[opt.id].highlight">
+                            <div class="plan-badges-top">
+                                <span class="plan-badge plan-badge-primary">Mais Escolhido</span>
+                            </div>
+                        </template>
+                    </div>
+                </template>
+            </div>
+            <div class="grid grid-cols-1 gap-6 md:grid-cols-3 md:items-stretch">
+                <template x-for="opt in outrosPlanOptions" :key="opt.id">
+                    <div>
+                        <div @click="selectPlan(opt.id)" class="plan-card relative cursor-pointer bg-white p-8 rounded-3xl shadow-sm border border-slate-200 flex flex-col transition-all duration-300 hover:shadow-xl" :class="{'selected shadow-xl border-blue-500 ring-4 ring-blue-100': marketSegment === 'outros' && selectedPlanKey === opt.id, 'best-value-card': planData.food.outros[opt.id].highlight}">
+                            <h3 class="text-2xl font-bold text-gray-900 mb-3" x-text="planData.food.outros[opt.id].name"></h3>
+                        <p class="text-sm text-gray-400 uppercase tracking-wide font-semibold mb-6 pb-4 border-b border-gray-100">Módulos inclusos</p>
+                        <ul class="space-y-3 text-gray-900 flex-grow text-sm">
+                            <template x-for="item in planData.food.outros[opt.id].fixedModules" :key="item">
+                                <li class="flex items-start">
+                                    <svg class="w-5 h-5 text-emerald-500 mr-3 flex-shrink-0 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>
+                                    <span class="leading-relaxed" x-text="item"></span>
+                                </li>
+                            </template>
+                        </ul>
+                        </div>
+                    </div>
+                </template>
+            </div>
+            </div>
         </section>
 
-        <section x-if="selectedPlan" x-transition class="grid grid-cols-1 lg:grid-cols-3 gap-12">
+        <section x-if="selectedPlan" x-transition class="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-12">
             
             <div class="lg:col-span-2">
-                <h2 class="text-2xl font-bold mb-6 text-gray-800">2. Personalize seu Plano</h2>
-                <div class="bg-white p-8 rounded-3xl shadow-sm border border-gray-100 space-y-8">
+                <div class="mb-6">
+                    <span class="section-eyebrow">Passo 2</span>
+                    <h2 class="section-title text-gray-900">Personalize seu plano</h2>
+                </div>
+                <div class="bg-white rounded-3xl shadow-md border border-slate-200 card-elevated overflow-hidden">
+                <div class="panel-body space-y-8 py-6 sm:py-8">
+                    <div x-show="selectedPlan && selectedPlan.pricing" class="flex flex-wrap items-center gap-3 pb-4 border-b border-gray-100">
+                        <span class="text-sm font-medium text-gray-700">Forma de pagamento do plano:</span>
+                        <div class="inline-flex rounded-xl bg-gray-100 p-1 gap-0.5">
+                            <button type="button" @click="billingPeriod = 'mensal'" :class="billingPeriod === 'mensal' ? 'bg-white shadow text-blue-600' : 'text-gray-600 hover:text-gray-800'" class="px-4 py-2 rounded-lg text-sm font-semibold transition">Mensal</button>
+                            <button type="button" @click="billingPeriod = 'anual'" :class="billingPeriod === 'anual' ? 'bg-white shadow text-blue-600' : 'text-gray-600 hover:text-gray-800'" class="px-4 py-2 rounded-lg text-sm font-semibold transition">Anual</button>
+                        </div>
+                        <p class="text-xs text-gray-500 w-full sm:w-auto">Valores mensais na tabela anual referem-se à mensalidade com fidelidade/pagamento anual (taxa de adesão R$ 0).</p>
+                    </div>
                     <div class="relative">
                         <input type="text" x-model="searchQuery" x-ref="searchInput" @keydown.down.prevent="focusFirstModule()" @keydown.enter.prevent="selectFirstFilteredModule()" placeholder="Pesquisar módulo..." class="form-input !p-4 !pl-12 !rounded-xl !border-gray-200 !bg-gray-50 focus:!bg-white focus:!border-blue-400 focus:!ring-2 focus:!ring-blue-100">
                         <svg class="w-5 h-5 text-gray-400 absolute left-4 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
@@ -260,19 +379,29 @@
                         </div>
                     </div>
                 </div>
+                </div>
             </div>
 
             <div class="lg:col-span-1">
-                 <h2 class="text-2xl font-bold mb-6 text-gray-800">3. Resumo do Orçamento</h2>
-                <div class="bg-gradient-to-br from-white to-gray-50 p-8 rounded-3xl shadow-lg border border-gray-100 sticky top-8 ml-8">
-                    <h3 class="text-2xl font-bold text-center mb-6" x-text="selectedPlan.name"></h3>
+                <div class="mb-6 lg:ml-0 ml-0">
+                    <span class="section-eyebrow">Passo 3</span>
+                    <h2 class="section-title text-gray-900">Resumo do orçamento</h2>
+                </div>
+                <div class="summary-panel bg-gradient-to-br from-white to-gray-50 rounded-3xl shadow-lg border border-slate-200 sticky top-6 lg:ml-6 overflow-hidden">
+                <div class="panel-body py-6 sm:py-8 space-y-4">
+                    <h3 class="text-2xl font-bold text-center mb-2 px-1" x-text="selectedPlan.name"></h3>
+                    <p class="text-center text-sm text-gray-500 mb-6" x-show="selectedPlan && selectedPlan.pricing">
+                        Tabela: <span class="font-semibold text-gray-700" x-text="billingPeriod === 'anual' ? 'Anual (mensalidade reduzida, sem taxa de adesão)' : 'Mensal (com taxa de adesão quando aplicável)'"></span>
+                    </p>
                     <div class="space-y-4 text-lg">
-                        <div class="flex justify-between"><span>Plano Base</span> <span class="summary-value">R$ <span x-text="summary.base.toFixed(2).replace('.', ',')"></span></span></div>
+                        <div class="flex justify-between">
+                            <span>Plano base <span class="text-gray-400 text-sm font-normal" x-show="selectedPlan && selectedPlan.pricing" x-text="billingPeriod === 'anual' ? '(mensalidade com tabela anual)' : '(tabela mensal)'"></span></span>
+                            <span class="summary-value">R$ <span x-text="summary.base.toFixed(2).replace('.', ',')"></span></span>
+                        </div>
                         <div x-show="summary.addons > 0" class="flex justify-between" x-transition><span>Módulos Adicionais</span> <span class="summary-value">R$ <span x-text="summary.addons.toFixed(2).replace('.', ',')"></span></span></div>
                         <div x-show="summary.optionals > 0" class="flex justify-between" x-transition><span>Módulos Opcionais</span> <span class="summary-value">R$ <span x-text="summary.optionals.toFixed(2).replace('.', ',')"></span></span></div>
-                        <div x-show="summary.setupCost > 0" class="flex justify-between text-orange-600" x-transition><span>Custo de Setup (1º mês)</span> <span class="summary-value">R$ <span x-text="summary.setupCost.toFixed(2).replace('.', ',')"></span></span></div>
                         <hr>
-                        <div class="flex justify-between font-bold text-xl"><span>Subtotal</span> <span class="summary-value">R$ <span x-text="summary.subtotal.toFixed(2).replace('.', ',')"></span></span></div>
+                        <div class="flex justify-between font-bold text-xl"><span>Subtotal (recorrente)</span> <span class="summary-value">R$ <span x-text="summary.subtotal.toFixed(2).replace('.', ',')"></span></span></div>
                         
                         <div x-show="courtesyModuleName" class="flex justify-between text-blue-600" x-transition>
                             <span>Cortesia: <span x-text="courtesyModuleName"></span></span>
@@ -287,24 +416,52 @@
                             </div>
                         </div>
 
-                         <div class="flex justify-between text-red-600">
-                            <div class="flex items-center">
-                                <span>Desconto (<span x-text="manualDiscountPercentage.toFixed(2).replace('.',',')"></span>%)</span>
-                                <button @click="openDiscountModal()" class="ml-2 text-xs text-blue-600 hover:underline">(Editar)</button>
+                         <div x-show="(selectedPlan && selectedPlan.pricing && billingPeriod === 'anual') || (selectedPlan && !selectedPlan.pricing)" class="space-y-1">
+                            <div class="flex justify-between text-red-600">
+                                <div class="flex items-center flex-wrap gap-1">
+                                    <span>Desconto comercial (<span x-text="effectiveManualDiscountPercent.toFixed(2).replace('.',',')"></span>%)</span>
+                                    <button type="button" x-show="selectedPlan && (!selectedPlan.pricing || billingPeriod === 'anual')" @click="openDiscountModal()" class="text-xs text-blue-600 hover:underline">(Editar)</button>
+                                </div>
+                                <span>- R$ <span x-text="summary.calculatedDiscountAmount.toFixed(2).replace('.', ',')"></span></span>
                             </div>
-                            <span>- R$ <span x-text="summary.calculatedDiscountAmount.toFixed(2).replace('.', ',')"></span></span>
+                            <p class="text-xs text-gray-600" x-show="selectedPlan && selectedPlan.pricing && billingPeriod === 'anual'">
+                                Economia total do desconto (plano + adicionais + opcionais, vs. tabela mensal): <strong>R$ <span x-text="summary.calculatedDiscountAmount.toFixed(2).replace('.', ',')"></span></strong>.
+                            </p>
                         </div>
+                        <p class="text-xs text-gray-500" x-show="selectedPlan && selectedPlan.pricing && billingPeriod === 'mensal'">No plano mensal não há desconto comercial percentual; o valor é o da tabela mensal.</p>
                     </div>
                     
-                    <div class="mt-8 pt-6 border-t-2 border">
-                        <div class="flex justify-between items-center text-2xl font-extrabold text-gray-900">
-                            <span>TOTAL</span>
-                            <span class="text-3xl text-blue-600">R$ <span x-text="summary.finalTotal.toFixed(2).replace('.', ',')"></span></span>
+                    <div x-show="summary.taxaAdesao > 0 || summary.setupCost > 0" class="mt-4 pt-4 border-t border-dashed border-gray-200 space-y-2 text-base">
+                        <div x-show="summary.taxaAdesao > 0" class="flex justify-between text-amber-800">
+                            <span>Taxa de adesão <span class="text-xs text-gray-500">(cobrança única)</span></span>
+                            <span class="font-semibold">R$ <span x-text="summary.taxaAdesao.toFixed(2).replace('.', ',')"></span></span>
+                        </div>
+                        <div x-show="summary.setupCost > 0" class="flex justify-between text-orange-600">
+                            <span>Setup de módulos <span class="text-xs text-gray-500">(1º mês)</span></span>
+                            <span class="font-semibold">R$ <span x-text="summary.setupCost.toFixed(2).replace('.', ',')"></span></span>
+                        </div>
+                        <div class="flex justify-between font-bold text-gray-800 pt-2">
+                            <span>Total no 1º mês</span>
+                            <span>R$ <span x-text="summary.totalFirstMonth.toFixed(2).replace('.', ',')"></span></span>
                         </div>
                     </div>
+
+                    <div class="mt-8 pt-6 border-t-2 border-slate-200 px-1">
+                        <p class="text-xs text-gray-500 mb-1 text-center">Total mensal recorrente (após desconto)</p>
+                        <div class="flex justify-between items-center text-2xl font-extrabold text-gray-900 gap-2">
+                            <span>TOTAL MENSAL</span>
+                            <span class="text-3xl text-blue-600 shrink-0">R$ <span x-text="summary.finalTotal.toFixed(2).replace('.', ',')"></span></span>
+                        </div>
+                    </div>
+
+                    <div class="mt-4 pt-4 border-t border-slate-200">
+                        <button type="button" @click="generatePDF()" class="w-full bg-blue-600 text-white font-bold py-3 rounded-xl hover:bg-blue-700 transition shadow-md hover:shadow-lg cursor-pointer">
+                            Gerar proposta em PDF
+                        </button>
+                    </div>
                     
-                    <div class="mt-6" x-show="summary.finalTotal > 0 && summary.finalTotal < summary.subtotal">
-                        <button @click="showLeadForm = !showLeadForm" class="w-full bg-orange-500 text-white font-bold py-3 rounded-lg hover:bg-orange-600 transition text-lg shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
+                    <div class="mt-2" x-show="summary.finalTotal > 0 && summary.finalTotal < summary.subtotal">
+                        <button type="button" @click="showLeadForm = !showLeadForm" class="w-full bg-orange-500 text-white font-bold py-3 rounded-xl hover:bg-orange-600 transition text-lg shadow-md hover:shadow-lg cursor-pointer">
                             Garantir Condição Especial
                         </button>
                         <div x-show="showLeadForm" x-transition class="mt-6 space-y-4">
@@ -317,10 +474,13 @@
                                         Compromisso de parceria de 12 meses para garantir seus benefícios.
                                     </p>
                                 </div>
-                                <input type="text" x-model="clientName" x-ref="clientNameInput" placeholder="Nome do Cliente" class="form-input" @input="leadFormError = ''">
-                                <input type="text" x-model="clientCPF" placeholder="CPF" class="form-input mt-4" @input="leadFormError = ''">
-                                <input type="text" x-model="clientCNPJ" placeholder="CNPJ (opcional)" class="form-input mt-4" @input="leadFormError = ''">
-                                <textarea x-model="clientObservation" placeholder="Observações (opcional)" class="form-input mt-4" rows="3"></textarea>
+                                <p class="text-xs text-gray-500 text-left mb-2">Preencha o que quiser — nenhum campo é obrigatório.</p>
+                                <input type="text" x-model="clientName" x-ref="clientNameInput" placeholder="Nome" class="form-input" @input="leadFormError = ''" autocomplete="name">
+                                <input type="email" x-model="clientEmail" placeholder="E-mail" class="form-input mt-3" @input="leadFormError = ''" autocomplete="email">
+                                <input type="text" x-model="clientCNPJ" placeholder="CNPJ" class="form-input mt-3" @input="leadFormError = ''" autocomplete="off">
+                                <input type="tel" x-model="clientPhone" placeholder="Telefone" class="form-input mt-3" @input="leadFormError = ''" autocomplete="tel">
+                                <input type="text" x-model="clientCPF" placeholder="CPF" class="form-input mt-3" @input="leadFormError = ''" autocomplete="off">
+                                <textarea x-model="clientObservation" placeholder="Observações" class="form-input mt-3" rows="3"></textarea>
                                 <p x-show="leadFormError" class="text-red-500 text-sm mt-2" x-text="leadFormError"></p>
                                 <button @click="submitLead()" class="w-full bg-blue-600 text-white font-bold py-2 rounded-lg hover:bg-blue-700 transition mt-4">
                                     Confirmar Dados e Gerar Cupom
@@ -341,13 +501,14 @@
                         </div>
                     </div>
                 </div>
+                </div>
             </div>
         </section>
     </div>
 
     <!-- Footer com linha de tempo -->
-    <footer x-show="loggedIn && selectedPlan" class="bottom-0 left-0 right-0 bg-white border-t-2 border-gray-300 shadow-2xl z-40">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-6">
+    <footer x-show="loggedIn && selectedPlan" class="footer-bar fixed bottom-0 left-0 right-0 z-40">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-5 pb-8">
             <div class="flex flex-col md:flex-row items-center justify-between gap-4">
                 <div class="flex items-center gap-4 w-full md:w-auto">
                     <label class="text-sm font-medium text-gray-700 whitespace-nowrap">

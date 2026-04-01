@@ -1,7 +1,13 @@
+/** Taxa de adesão (1ª mensalidade) — alinhada à tabela em build-planos-data.mjs */
+const TAXA_ADESAO_PADRAO = 250;
+
 function quoteCalculator() {
     return {
         // --- Properties ---
-        loggedIn: false, password: '', loginError: false, selectedSegment: 'food', selectedPlanKey: null, closingDate: (() => { const d = new Date(); d.setDate(d.getDate() + 1); return d.toISOString().split('T')[0]; })(), searchQuery: '', activeModuleIndex: -1,
+        loggedIn: false, password: '', loginError: false,
+        /** null até escolher; depois 'food' | 'varejo' | 'outros' */
+        marketSegment: null,
+        selectedSegment: 'balcao', selectedPlanKey: null, closingDate: (() => { const d = new Date(); d.setDate(d.getDate() + 1); return d.toISOString().split('T')[0]; })(), searchQuery: '', activeModuleIndex: -1,
         showDiscountModal: false, isDiscountAuthorized: false, discountPassword: '', discountPasswordError: false, 
         // Proteção da Data de Fechamento
         showClosingDateModal: false, isClosingDateAuthorized: false, closingDatePassword: '', closingDatePasswordError: false, tempClosingDate: '',
@@ -9,8 +15,10 @@ function quoteCalculator() {
         // Código especial para desconto acima de 20%
         showSpecialCodeModal: false, specialCode: '', specialCodeError: false,
         courtesyModuleName: null,
-        showLeadForm: false, leadCaptureSuccess: false, clientName: '', clientCPF: '', clientCNPJ: '', clientObservation: '', leadFormError: '',
+        showLeadForm: false, leadCaptureSuccess: false, clientName: '', clientEmail: '', clientCPF: '', clientCNPJ: '', clientPhone: '', clientObservation: '', leadFormError: '',
         generatedCouponCode: '', annualSavings: 0, countdownTimer: null, countdownText: '',
+        /** 'mensal' | 'anual' — preço base e taxa de adesão (planos com `pricing`) */
+        billingPeriod: 'mensal',
         selectedYears: 1,
         showPdfSuccess: false,
         showDiscountSuccess: false,
@@ -19,184 +27,30 @@ function quoteCalculator() {
     // Defina aqui módulos que você não quer que recebam desconto
         ]),
 
-        planData: typeof PLAN_DATA !== 'undefined' ? PLAN_DATA : (() => {
-            // Fallback data se PLAN_DATA não estiver disponível
-            return {
-            food: {
-                pdv: {
-                    name: 'Plano PDV', basePrice: 221.11, baseUsers: 2, basePdvs: 1,
-                    fixedModules: ['2x Usuários', '1x PDV - Frente de Caixa', '30 Notas Fiscais', 'Suporte Técnico - Via chamados', 'Relatório Básico'],
-                    additionalUsers: { count: 0, price: 19.90, max: 1 }, additionalPdvs: { count: 0, price: 0, max: 0 },
-                    optionalModules: [
-                        { name: 'Delivery', price: 30.00, quantifiable: false, selected: false },
-                        { name: 'Hub de Delivery', price: 79.00, quantifiable: false, selected: false, requires: ['Delivery'] },
-                        { name: 'Delivery Direto Básico', price: 99.00, quantifiable: false, selected: false, requires: ['Hub de Delivery'] },
-                        { name: 'Delivery Direto Profissional', price: 200.00, quantifiable: false, selected: false, requires: ['Hub de Delivery'] },
-                        { name: 'Delivery Direto VIP', price: 300.00, quantifiable: false, selected: false, requires: ['Hub de Delivery'] },
-                        { name: 'TEF', price: 99.90, quantifiable: true, count: 0 },
-                        { name: 'Importação de XML', price: 29.00, quantifiable: false, selected: false },
-                        { name: 'Autoatendimento', price: 299.00, quantifiable: true, count: 0 },
-                        { name: 'Contratos de cartões', price: 50.00, quantifiable: false, selected: false },
-                        { name: 'Ordem de Serviço', price: 20.00, quantifiable: false, selected: false },
-                        { name: 'Estoque em Grade', price: 40.00, quantifiable: false, selected: false },
-                        { name: 'Conciliação Bancária', price: 50.00, quantifiable: false, selected: false },
-                        { name: 'Contratos de cartões e outros', price: 50.00, quantifiable: false, selected: false },
-                    ]
-                },
-                gestao: {
-                    name: 'Plano Gestão', basePrice: 332.22, baseUsers: 3, basePdvs: 1, // Alterado basePdvs para 1
-                    fixedModules: ['3x Usuários', '1x PDV - Frente de Caixa', 'Notas Fiscais Ilimitadas', 'Importação de XML', 'Painel Senha TV', 'Estoque em Grade', 'Financeiro, Estoque e Relatórios', 'Suporte Técnico - Via Chat', 'Delivery', 'Relatório KDS', 'Produção', 'Controle de Mesas'], // Alterado para 1x PDV
-                    additionalUsers: { count: 0, price: 19.90, max: 2 }, additionalPdvs: { count: 0, price: 59.90, max: 2 }, // Alterado max para 2
-                    optionalModules: [
-                        { name: 'Facilita NFE', price: 99.00, quantifiable: false, selected: false }, 
-                        { name: 'Conciliação Bancária', price: 50.00, quantifiable: false, selected: false },
-                        { name: 'Contratos de cartões', price: 50.00, quantifiable: false, selected: false }, 
-                        // O módulo 'Delivery' já está fixo neste plano, a dependência funcionará naturalmente.
-                        { name: 'Hub de Delivery', price: 79.90, quantifiable: false, selected: false, requires: ['Delivery'] },
-                        { name: 'Delivery Direto Básico', price: 99.00, quantifiable: false, selected: false, requires: ['Hub de Delivery'] },
-                        { name: 'Delivery Direto Profissional', price: 200.00, quantifiable: false, selected: false, requires: ['Hub de Delivery'] },
-                        { name: 'Delivery Direto VIP', price: 300.00, quantifiable: false, selected: false, requires: ['Hub de Delivery'] },
-                        { name: 'TEF', price: 99.90, quantifiable: true, count: 0 }, 
-                        { name: 'Integração API', price: 199.90, quantifiable: false, selected: false },
-                        { name: 'Business Intelligence (BI)', price: 199.00, quantifiable: false, selected: false }, 
-                        { name: 'Backup Realtime', price: 199.00, quantifiable: false, selected: false },
-                        { name: 'Cardápio digital', price: 99.00, quantifiable: false, selected: false }, 
-                        { name: 'Smart Menu', price: 99.00, quantifiable: false, selected: false },
-                        { name: 'Ordem de Serviço', price: 20.00, quantifiable: false, selected: false },
-                        { name: 'App Gestão CPlug', price: 20.00, quantifiable: false, selected: false }, 
-                        { name: 'Painel Senha Mobile', price: 49.00, quantifiable: false, selected: false },
-                        { name: 'Promoções', price: 24.50, quantifiable: false, selected: false }, 
-                        { name: 'Marketing', price: 24.50, quantifiable: false, selected: false },
-                        { name: 'Relatório Dinâmico', price: 50.00, quantifiable: false, selected: false }, 
-                        { name: 'Atualização em Tempo Real', price: 49.00, quantifiable: false, selected: false },
-                        { name: 'Smart TEF', price: 49.90, quantifiable: true, count: 0 }, 
-                        { name: 'Autoatendimento', price: 299.00, quantifiable: true, count: 0 },
-                        { name: 'Suporte Técnico - Estendido', price: 99.00, quantifiable: false, selected: false },
-                        { name: 'Programa de Fidelidade', price: 299.90, setupCost: 1000.00, quantifiable: false, selected: false },
-                    ]
-                },
-                performance: {
-                    name: 'Plano Performance', basePrice: 443.33, baseUsers: 5, basePdvs: 2,
-                    fixedModules: ['5x Usuários', '2x PDV - Frente de Caixa', '3x Smart TEF', 'Produção', 'Promoções', 'Notas Fiscais Ilimitadas', 'Importação de XML', 'Hub de Delivery', 'Ordem de Serviço', 'Delivery', 'App Gestão CPlug', 'Relatório KDS', 'Painel Senha TV', 'Painel Senha Mobile', 'Controle de Mesas', 'Estoque em Grade', 'Marketing', 'Relatório Básico', 'Relatório Dinâmico', 'Atualização em Tempo Real', 'Facilita NFE', 'Conciliação Bancária', 'Contratos de cartões e outros', 'Suporte Técnico Completo (Todos os canais)'],
-                    additionalUsers: { count: 0, price: 19.90, max: 5 }, additionalPdvs: { count: 0, price: 59.90, max: 5 },
-                    optionalModules: [
-                        // Os módulos 'Delivery' e 'Hub de Delivery' já estão fixos neste plano.
-                        { name: 'Delivery Direto Básico', price: 99.00, quantifiable: false, selected: false, requires: ['Hub de Delivery'] }, 
-                        { name: 'Delivery Direto Profissional', price: 200.00, quantifiable: false, selected: false, requires: ['Hub de Delivery'] },
-                        { name: 'Delivery Direto VIP', price: 300.00, quantifiable: false, selected: false, requires: ['Hub de Delivery'] },
-                        { name: 'TEF', price: 99.90, quantifiable: true, count: 0 }, { name: 'Programa de Fidelidade', price: 299.90, setupCost: 1000.00, quantifiable: false, selected: false },
-                        { name: 'Integração TAP', price: 299.00, quantifiable: false, selected: false }, { name: 'Integração API', price: 199.90, quantifiable: false, selected: false },
-                        { name: 'Business Intelligence (BI)', price: 99.00, quantifiable: false, selected: false }, { name: 'Backup Realtime', price: 99.00, quantifiable: false, selected: false },
-                        { name: 'Cardápio digital', price: 99.00, quantifiable: false, selected: false }, { name: 'Smart Menu', price: 99.00, quantifiable: false, selected: false },
-                        { name: 'Autoatendimento', price: 299.00, quantifiable: true, count: 0 },
-                    ]
-                }
-            },
-            varejo: {
-                 pdv: {
-                    name: 'Plano PDV', basePrice: 221.11, baseUsers: 2, basePdvs: 1,
-                    fixedModules: ['2x Usuários', '1x PDV - Frente de Caixa', '30 Notas Fiscais', 'Suporte Técnico - Via Chamados', 'Relatório Básico'],
-                    additionalUsers: { count: 0, price: 19.90, max: 1 }, additionalPdvs: { count: 0, price: 0.00, max: 0 },
-                    optionalModules: [
-                        // Adicionando módulos de delivery para a lógica de dependência funcionar
-                        { name: 'Delivery', price: 30.00, quantifiable: false, selected: false },
-                        { name: 'Hub de Delivery', price: 79.00, quantifiable: false, selected: false, requires: ['Delivery'] },
-                        { name: 'TEF', price: 99.90, quantifiable: true, count: 0 }, { name: 'Importação de XML', price: 29.00, quantifiable: false, selected: false },
-                        { name: 'Estoque em Grade', price: 40.00, quantifiable: false, selected: false }, { name: 'Conciliação Bancária', price: 50.00, quantifiable: false, selected: false },
-                        { name: 'Contratos de cartões e outros', price: 50.00, quantifiable: false, selected: false }, { name: 'Ordem de Serviço', price: 20.00, quantifiable: false, selected: false },
-                        { name: 'Autoatendimento', price: 299.00, quantifiable: true, count: 0 },
-                    ]
-                },
-                gestao: {
-                    name: 'Plano Gestão', basePrice: 332.22, baseUsers: 3, basePdvs: 1, // Alterado basePdvs para 1
-                    fixedModules: ['3x Usuários', '1x PDV - Frente de Caixa', 'Notas Fiscais Ilimitadas', 'Importação de XML', 'Estoque em Grade', 'Financeiro, Estoque e Relatórios', 'Suporte Técnico - Via Chat', 'Facilita NFE', 'Contratos de cartões e outros', 'Promoções'], // Alterado para 1x PDV
-                    additionalUsers: { count: 0, price: 19.90, max: 2 }, additionalPdvs: { count: 0, price: 59.90, max: 2 }, // Alterado max para 2
-                    optionalModules: [
-                        { name: 'Delivery', price: 30.00, quantifiable: false, selected: false },
-                        { name: 'Hub de Delivery', price: 79.90, quantifiable: false, selected: false, requires: ['Delivery'] },
-                        { name: 'Delivery Direto Básico', price: 99.00, quantifiable: false, selected: false, requires: ['Hub de Delivery'] },
-                        { name: 'Delivery Direto Profissional', price: 200.00, quantifiable: false, selected: false, requires: ['Hub de Delivery'] }, 
-                        { name: 'Delivery Direto VIP', price: 300.00, quantifiable: false, selected: false, requires: ['Hub de Delivery'] },
-                        { name: 'TEF', price: 99.90, quantifiable: true, count: 0 }, 
-                        { name: 'Smart TEF', price: 49.90, quantifiable: true, count: 0 },
-                        { name: 'Autoatendimento', price: 299.00, quantifiable: true, count: 0 },
-                        { name: 'Integração API', price: 199.90, quantifiable: false, selected: false },
-                        { name: 'Suporte Técnico - Estendido', price: 99.00, quantifiable: false, selected: false }, 
-                        { name: 'Conciliação Bancária', price: 50.00, quantifiable: false, selected: false },
-                        { name: 'Programa de Fidelidade', price: 299.90, setupCost: 1000.00, quantifiable: false, selected: false },
-                        { name: 'Painel Senha', price: 49.00, quantifiable: false, selected: false }, 
-                        { name: 'Relatório Dinâmico', price: 50.00, quantifiable: false, selected: false }, 
-                        { name: 'Backup Realtime', price: 199.00, quantifiable: false, selected: false },
-                        { name: 'Business Intelligence (BI)', price: 199.00, quantifiable: false, selected: false }, 
-                        { name: 'App Gestão CPlug', price: 20.00, quantifiable: false, selected: false },
-                        { name: 'Marketing', price: 24.50, quantifiable: false, selected: false }, 
-                        { name: 'Produção', price: 30.00, quantifiable: false, selected: false }, 
-                        { name: 'Ordem de Serviço', price: 20.00, quantifiable: false, selected: false },
-                        { name: 'Controle de Mesas', price: 49.00, quantifiable: false, selected: false },
-                        { name: 'Atualização em Tempo Real', price: 49.00, quantifiable: false, selected: false },
-                    ]
-                },
-                performance: {
-                    name: 'Plano Performance', basePrice: 443.33, baseUsers: 5, basePdvs: 2,
-                    fixedModules: ['5x Usuários', '2x PDV - Frente de Caixa', '3x Smart TEF', 'Produção', 'Promoções', 'Notas Fiscais Ilimitadas', 'Importação de XML', 'Ordem de Serviço', 'App Gestão CPlug', 'Painel de Senha TV', 'Painel de Senha Mobile', 'Controle de Mesas', 'Delivery','Estoque em Grade', 'Marketing', 'Relatórios, Financeiro e Estoque', 'Relatório Dinâmico', 'Atualização em Tempo Real', 'Facilita NFE', 'Conciliação Bancária', 'Contratos de cartões e outros', 'Suporte Técnico Completo (Todos os canais)'],
-                    additionalUsers: { count: 0, price: 19.90, max: 5 }, 
-                    additionalPdvs: { count: 0, price: 59.90, max: 5 },
-                    optionalModules: [
-                        // Adicionando módulos de delivery para a lógica de dependência funcionar
-                        { name: 'Hub de Delivery', price: 79.90, quantifiable: false, selected: false, requires: ['Delivery'] },
-                        { name: 'Delivery Direto Básico', price: 99.00, quantifiable: false, selected: false, requires: ['Hub de Delivery'] },
-                        { name: 'Delivery Direto Profissional', price: 200.00, quantifiable: false, selected: false, requires: ['Hub de Delivery'] },
-                        { name: 'Delivery Direto VIP', price: 300.00, quantifiable: false, selected: false, requires: ['Hub de Delivery'] },
-                        { name: 'Integração API', price: 199.90, quantifiable: false, selected: false }, 
-                        { name: 'Integração TAP', price: 299.00, quantifiable: false, selected: false },
-                        { name: 'Backup Realtime', price: 99.00, quantifiable: false, selected: false }, 
-                        { name: 'Business Intelligence (BI)', price: 99.00, quantifiable: false, selected: false },
-                        { name: 'Programa de Fidelidade', price: 299.90, setupCost: 1000.00, quantifiable: false, selected: false },
-                        { name: 'Cardápio digital', price: 99.00, quantifiable: false, selected: false },
-                        { name: 'Smart Menu', price: 99.00, quantifiable: false, selected: false },
-                        { name: 'E-Mail Profissional', price: 19.90, quantifiable: false, selected: false },
-                        { name: 'Entrega fácil iFood', price: 49.90, quantifiable: false, selected: false },
-                        { name: 'Painel Multilojas', price: 199.90, quantifiable: false, selected: false },
-                        { name: 'API DD', price: 49.90, quantifiable: false, selected: false },
-                        { name: 'Central Telefônica', price: 399.90, setupCost: 500.00, quantifiable: false, selected: false },
+        marketSegments: typeof MARKET_SEGMENTS !== 'undefined' ? MARKET_SEGMENTS : [
+            { id: 'food', label: 'Food' },
+            { id: 'varejo', label: 'Varejo' },
+            { id: 'outros', label: 'Outros' },
+        ],
 
-                    ]
-                }
-            },
-            outros: { // Novo segmento para planos independentes
-                bling: {
-                    name: 'Plano Bling', basePrice: 277.67, baseUsers: 2, basePdvs: 1,
-                    fixedModules: ['1x PDV - Frente de Caixa', '2x Usuários', 'Notas Fiscais Ilimitadas', 'Relatórios', 'Suporte Técnico - Via chamados', 'Suporte Técnico - Via chat', 'Estoque em Grade'],
-                    additionalUsers: { count: 0, price: 19.90, max: Infinity }, // Infinitos usuários
-                    additionalPdvs: { count: 0, price: 59.90, max: Infinity }, // Infinitos PDVs
-                    optionalModules: [
-                        { name: 'Controle de mesas e comandas', price: 49.00, quantifiable: false, selected: false },
-                        { name: 'Contratos de cartões e outros', price: 50.00, quantifiable: false, selected: false },
-                        { name: 'Suporte Técnico - Estendido', price: 99.00, quantifiable: false, selected: false },
-                        { name: 'Delivery', price: 30.00, quantifiable: false, selected: false },
-                        { name: 'TEF', price: 99.90, quantifiable: true, count: 0, max: Infinity }, // Infinitos TEF
-                        { name: 'Smart TEF', price: 49.90, quantifiable: true, count: 0, max: Infinity }, // Infinitos SmartTEF
-                        { name: 'Autoatendimento', price: 299.00, quantifiable: true, count: 0, max: Infinity }, // Infinitos Autoatendimento
-                    ]
-                },
-                autoatendimento: {
-                    name: 'Plano Autoatendimento', basePrice: 332.50, baseUsers: 1, basePdvs: 0,
-                    fixedModules: ['1x Terminais Autoatendimento', '1x Usuários', 'Suporte Técnico - Via chat', 'Suporte Técnico - Via chamados', 'Suporte Técnico - Estendido', 'Contratos de cartões e outros', 'Notas Fiscais Ilimitadas', 'Relatório Básico'],
-                    additionalUsers: { count: 0, price: 19.90, max: Infinity }, // Infinitos usuários
-                    additionalPdvs: { count: 0, price: 0, max: 0 }, // Não mencionado como adicional
-                    optionalModules: [
-                        { name: 'Facilita NFE', price: 99.00, quantifiable: false, selected: false },
-                        { name: 'Importação de XML', price: 29.00, quantifiable: false, selected: false },
-                        { name: 'Promoções', price: 24.50, quantifiable: false, selected: false },
-                        { name: 'Estoque em Grade', price: 40.00, quantifiable: false, selected: false },
-                        { name: 'Business Intelligence (BI)', price: 199.00, quantifiable: false, selected: false },
-                        { name: 'Atualização em Tempo Real', price: 49.00, quantifiable: false, selected: false },
-                        { name: 'Autoatendimento', price: 299.00, quantifiable: true, count: 0, max: Infinity }, // Infinitos Terminais de Autoatendimento (adicionais)
-                    ]
-                }
-            }
-            };
-        })(),
+        planFamilies: typeof PLAN_FAMILIES !== 'undefined' ? PLAN_FAMILIES : [
+            { id: 'balcao', label: 'Planos Balcão' },
+            { id: 'delivery', label: 'Planos Delivery' },
+            { id: 'deliveryBalcao', label: 'Planos Delivery + Balcão' },
+        ],
+
+        varejoPlanOptions: typeof VAREJO_PLAN_OPTIONS !== 'undefined' ? VAREJO_PLAN_OPTIONS : [
+            { id: 'pdv', label: 'PDV Básico' },
+            { id: 'gestao', label: 'Plano Gestão' },
+            { id: 'performance', label: 'Plano Performance' },
+        ],
+
+        outrosPlanOptions: typeof OUTROS_PLAN_OPTIONS !== 'undefined' ? OUTROS_PLAN_OPTIONS : [
+            { id: 'bling', label: 'Plano Bling' },
+            { id: 'autoatendimento', label: 'Autoatendimento' },
+        ],
+
+        planData: typeof PLAN_DATA !== 'undefined' ? PLAN_DATA : {},
         
         // --- Computed Properties ---
         get eligibleForCourtesy() {
@@ -204,8 +58,81 @@ function quoteCalculator() {
             return this.selectedPlan.optionalModules.filter(mod => (mod.selected || mod.count > 0) && mod.price <= 50.00 && mod.price > 0);
         },
 
-        get selectedPlan() { return this.selectedPlanKey ? this.planData[this.selectedSegment][this.selectedPlanKey] : null; },
-        
+        get selectedPlan() {
+            if (!this.planData.food || !this.planData.varejo) return null;
+            if (!this.marketSegment) return null;
+            if (this.marketSegment === 'varejo') {
+                return this.selectedSegment ? this.planData.varejo[this.selectedSegment] : null;
+            }
+            if (this.marketSegment === 'outros') {
+                const outros = this.planData.food.outros;
+                return this.selectedPlanKey && outros ? outros[this.selectedPlanKey] : null;
+            }
+            return this.selectedPlanKey ? this.planData.food[this.selectedSegment][this.selectedPlanKey] : null;
+        },
+
+        get recurringBasePrice() {
+            const p = this.selectedPlan;
+            if (!p) return 0;
+            const pr = p.pricing;
+            if (!pr) return p.basePrice;
+            const slot = pr[this.billingPeriod] || pr.mensal;
+            return slot.preco;
+        },
+
+        get taxaAdesaoAmount() {
+            const p = this.selectedPlan;
+            if (!p) return 0;
+            const pr = p.pricing;
+            if (!pr) return TAXA_ADESAO_PADRAO;
+            const slot = pr[this.billingPeriod] || pr.mensal;
+            return slot.taxa_adesao ?? 0;
+        },
+
+        /** Preço de tabela mensal (referência); usado para exibir desconto do plano anual */
+        get referenceBasePrice() {
+            const p = this.selectedPlan;
+            if (!p) return 0;
+            const pr = p.pricing;
+            if (!pr) return p.basePrice;
+            return pr.mensal.preco;
+        },
+
+        /** % de desconto da tabela (referência mensal → preço anual), ex.: 249→199 */
+        fidelityDefaultPercent(plan) {
+            if (!plan?.pricing) return null;
+            const m = plan.pricing.mensal.preco;
+            const a = plan.pricing.anual.preco;
+            return Number((100 * (1 - a / m)).toFixed(4));
+        },
+
+        /** Base efetiva do plano: mensal = tabela mensal; anual = referência × (1 − % comercial/100) */
+        get effectivePlanBasePrice() {
+            const p = this.selectedPlan;
+            if (!p) return 0;
+            if (!p.pricing) return this.recurringBasePrice;
+            if (this.billingPeriod === 'mensal') return p.pricing.mensal.preco;
+            const ref = this.referenceBasePrice;
+            return ref * (1 - this.manualDiscountPercentage / 100);
+        },
+
+        /** Fator (1 − %) aplicado ao plano, adicionais e opcionais no anual com tabela */
+        get commercialDiscountFactor() {
+            if (!this.selectedPlan?.pricing || this.billingPeriod !== 'anual') return 1;
+            return 1 - this.manualDiscountPercentage / 100;
+        },
+
+        get tempCommercialDiscountFactor() {
+            if (!this.selectedPlan?.pricing || this.billingPeriod !== 'anual') return 1;
+            return 1 - this.tempDiscountPercentage / 100;
+        },
+
+        /** Desconto % comercial aplica só no anual (planos com tabela); mensal = 0% */
+        get effectiveManualDiscountPercent() {
+            if (!this.selectedPlan?.pricing) return this.manualDiscountPercentage;
+            return this.billingPeriod === 'mensal' ? 0 : this.manualDiscountPercentage;
+        },
+
         get filteredOptionalModules() {
             if (!this.selectedPlan) return [];
             if (!this.searchQuery) return this.selectedPlan.optionalModules;
@@ -214,70 +141,103 @@ function quoteCalculator() {
 
         get tempFinalTotal() {
             if (!this.selectedPlan) return 0;
-            const base = this.selectedPlan.basePrice;
-            const addons = (this.selectedPlan.additionalUsers.count * this.selectedPlan.additionalUsers.price) + (this.selectedPlan.additionalPdvs.count * this.selectedPlan.additionalPdvs.price);
-            const optionals = this.selectedPlan.optionalModules.reduce((total, mod) => total + (mod.quantifiable ? mod.count * mod.price : (mod.selected ? mod.price : 0)), 0);
-            const subtotal = base + addons + optionals;
-            const courtesyValue = this.eligibleForCourtesy.find(m => m.name === this.courtesyModuleName)?.price || 0;
-            let amountEligibleForPercentageDiscount = base + addons;
-            this.selectedPlan.optionalModules.forEach(mod => {
-                if (!this.noDiscountModules.has(mod.name) && (mod.selected || mod.count > 0)) {
-                    amountEligibleForPercentageDiscount += mod.quantifiable ? mod.count * mod.price : mod.price;
-                }
-            });
-            if (courtesyValue > 0 && !this.noDiscountModules.has(this.courtesyModuleName)) {
-                amountEligibleForPercentageDiscount -= courtesyValue;
+            const p = this.selectedPlan;
+            const addonsRaw = (p.additionalUsers.count * p.additionalUsers.price) + (p.additionalPdvs.count * p.additionalPdvs.price);
+            const optionalsRaw = p.optionalModules.reduce((total, mod) => total + (mod.quantifiable ? mod.count * mod.price : (mod.selected ? mod.price : 0)), 0);
+            const courtesyRaw = this.eligibleForCourtesy.find(m => m.name === this.courtesyModuleName)?.price || 0;
+
+            if (p.pricing && this.billingPeriod === 'anual') {
+                const f = this.tempCommercialDiscountFactor;
+                const ref = this.referenceBasePrice;
+                const R = ref + addonsRaw + optionalsRaw;
+                return (R - courtesyRaw) * f;
             }
-            const calculatedDiscountAmount = amountEligibleForPercentageDiscount * (this.tempDiscountPercentage / 100);
-            const totalReduction = courtesyValue + calculatedDiscountAmount;
-            return subtotal - totalReduction;
+
+            const base = this.recurringBasePrice;
+            const subtotal = base + addonsRaw + optionalsRaw;
+            return subtotal - courtesyRaw;
         },
 
         get summary() {
-            if (!this.selectedPlan) return { base: 0, addons: 0, optionals: 0, setupCost: 0, subtotal: 0, courtesyValue: 0, calculatedDiscountAmount: 0, totalReduction: 0, finalTotal: 0, effectivePercentage: 0 };
-            const base = this.selectedPlan.basePrice;
-            const addons = (this.selectedPlan.additionalUsers.count * this.selectedPlan.additionalUsers.price) + (this.selectedPlan.additionalPdvs.count * this.selectedPlan.additionalPdvs.price);
-            const optionals = this.selectedPlan.optionalModules.reduce((total, mod) => total + (mod.quantifiable ? mod.count * mod.price : (mod.selected ? mod.price : 0)), 0);
-            
-            // Calcula custo de setup (apenas primeiro mês)
-            const setupCost = this.selectedPlan.optionalModules.reduce((total, mod) => {
+            if (!this.selectedPlan) return { base: 0, referenceBase: 0, addons: 0, optionals: 0, setupCost: 0, taxaAdesao: 0, subtotal: 0, courtesyValue: 0, calculatedDiscountAmount: 0, totalReduction: 0, finalTotal: 0, totalFirstMonth: 0, effectivePercentage: 0 };
+            const p = this.selectedPlan;
+            const referenceBase = p.pricing ? this.referenceBasePrice : this.recurringBasePrice;
+            const addonsRaw = (p.additionalUsers.count * p.additionalUsers.price) + (p.additionalPdvs.count * p.additionalPdvs.price);
+            const optionalsRaw = p.optionalModules.reduce((total, mod) => total + (mod.quantifiable ? mod.count * mod.price : (mod.selected ? mod.price : 0)), 0);
+
+            const setupCost = p.optionalModules.reduce((total, mod) => {
                 if ((mod.selected || (mod.quantifiable && mod.count > 0)) && mod.setupCost) {
                     return total + mod.setupCost;
                 }
                 return total;
             }, 0);
-            
-            const subtotal = base + addons + optionals;
-            
-            const courtesyValue = this.eligibleForCourtesy.find(m => m.name === this.courtesyModuleName)?.price || 0;
-            
-            let amountEligibleForPercentageDiscount = base + addons;
-            this.selectedPlan.optionalModules.forEach(mod => {
-                if (!this.noDiscountModules.has(mod.name) && (mod.selected || mod.count > 0)) {
-                    amountEligibleForPercentageDiscount += mod.quantifiable ? mod.count * mod.price : mod.price;
-                }
-            });
 
-            if (courtesyValue > 0 && !this.noDiscountModules.has(this.courtesyModuleName)) {
-                amountEligibleForPercentageDiscount -= courtesyValue;
+            const courtesyRaw = this.eligibleForCourtesy.find(m => m.name === this.courtesyModuleName)?.price || 0;
+
+            let base;
+            let addons = addonsRaw;
+            let optionals = optionalsRaw;
+            let courtesyValue = courtesyRaw;
+            let calculatedDiscountAmount = 0;
+
+            if (p.pricing && this.billingPeriod === 'anual') {
+                const f = this.commercialDiscountFactor;
+                const pct = this.manualDiscountPercentage / 100;
+                const R = referenceBase + addonsRaw + optionalsRaw;
+                base = referenceBase * f;
+                addons = addonsRaw * f;
+                optionals = optionalsRaw * f;
+                courtesyValue = courtesyRaw * f;
+                calculatedDiscountAmount = R * pct;
+            } else if (p.pricing && this.billingPeriod === 'mensal') {
+                base = p.pricing.mensal.preco;
+            } else {
+                base = this.recurringBasePrice;
+                let amountEligibleForPercentageDiscount = base + addonsRaw;
+                p.optionalModules.forEach(mod => {
+                    if (!this.noDiscountModules.has(mod.name) && (mod.selected || mod.count > 0)) {
+                        amountEligibleForPercentageDiscount += mod.quantifiable ? mod.count * mod.price : mod.price;
+                    }
+                });
+                if (courtesyRaw > 0 && !this.noDiscountModules.has(this.courtesyModuleName)) {
+                    amountEligibleForPercentageDiscount -= courtesyRaw;
+                }
+                calculatedDiscountAmount = amountEligibleForPercentageDiscount * (this.manualDiscountPercentage / 100);
             }
-            
-            const calculatedDiscountAmount = amountEligibleForPercentageDiscount * (this.manualDiscountPercentage / 100);
-            const totalReduction = courtesyValue + calculatedDiscountAmount;
-            const finalTotal = subtotal - totalReduction;
+
+            const subtotal = base + addons + optionals;
+
+            let finalTotal;
+            let totalReduction;
+            if (p.pricing && this.billingPeriod === 'anual') {
+                finalTotal = subtotal - courtesyValue;
+                totalReduction = courtesyValue;
+            } else if (p.pricing && this.billingPeriod === 'mensal') {
+                finalTotal = subtotal - courtesyValue;
+                totalReduction = courtesyValue;
+            } else {
+                totalReduction = courtesyValue + calculatedDiscountAmount;
+                finalTotal = subtotal - totalReduction;
+            }
+
+            const taxaAdesao = this.taxaAdesaoAmount;
+            const totalFirstMonth = finalTotal + setupCost + taxaAdesao;
             const effectivePercentage = subtotal > 0 ? (totalReduction / subtotal) * 100 : 0;
 
-            return { 
-                base, 
-                addons, 
-                optionals, 
+            return {
+                base,
+                referenceBase,
+                addons,
+                optionals,
                 setupCost,
-                subtotal, 
-                courtesyValue, 
-                calculatedDiscountAmount, 
-                totalReduction, 
+                taxaAdesao,
+                subtotal,
+                courtesyValue,
+                calculatedDiscountAmount,
+                totalReduction,
                 finalTotal,
-                effectivePercentage 
+                totalFirstMonth,
+                effectivePercentage
             };
         },
 
@@ -286,40 +246,112 @@ function quoteCalculator() {
             this.$watch('selectedPlan.optionalModules', () => {
                 if (!this.selectedPlan) return;
                 const tefModule = this.selectedPlan.optionalModules.find(m => m.name === 'TEF');
-                const contractModule = this.selectedPlan.optionalModules.find(m => m.name === 'Contratos de cartões');
+                const contractModule = this.selectedPlan.optionalModules.find(m => m.name === 'Contratos de cartões e outros');
                 if (tefModule && contractModule && tefModule.count > 0 && !contractModule.selected) {
                     contractModule.selected = true;
                 }
             }, { deep: true });
+            this.$watch('billingPeriod', (v) => {
+                if (!this.selectedPlan?.pricing) return;
+                if (v === 'mensal') {
+                    this.manualDiscountPercentage = 0;
+                    this.tempDiscountPercentage = 0;
+                } else {
+                    const fd = this.fidelityDefaultPercent(this.selectedPlan);
+                    if (fd != null) {
+                        this.manualDiscountPercentage = fd;
+                        this.tempDiscountPercentage = fd;
+                    }
+                }
+            });
             window.addEventListener('keydown', (e) => this.handleKeyPress(e));
         },
 
         login() { if (this.password) { this.loggedIn = true; this.loginError = false; } else { this.loginError = true; } },
         
-        selectPlan(key) {
-            this.selectedPlanKey = key;
-            if (key === null) return;
+        resetAllPlanInstances() {
+            const resetPlan = (plan) => {
+                if (!plan || !plan.optionalModules) return;
+                plan.additionalUsers.count = 0;
+                plan.additionalPdvs.count = 0;
+                plan.optionalModules.forEach(mod => {
+                    if (mod.quantifiable) mod.count = 0;
+                    else mod.selected = false;
+                });
+            };
+            if (this.planData.food) {
+                Object.values(this.planData.food).forEach(family => {
+                    Object.values(family).forEach(resetPlan);
+                });
+            }
+            if (this.planData.varejo) {
+                Object.values(this.planData.varejo).forEach(resetPlan);
+            }
+        },
+
+        applyDefaultsForCurrentPlan() {
+            const p = this.selectedPlan;
+            this.billingPeriod = 'mensal';
+            if (p?.pricing) {
+                this.manualDiscountPercentage = 0;
+                this.tempDiscountPercentage = 0;
+            } else {
+                this.manualDiscountPercentage = 10;
+                this.tempDiscountPercentage = 10;
+            }
             this.searchQuery = '';
-            this.manualDiscountPercentage = 10;
             this.courtesyModuleName = null;
             this.leadCaptureSuccess = false;
             this.showLeadForm = false;
-            // Reset counts for all plans when a new plan is selected
-            Object.values(this.planData).forEach(segment => {
-                Object.values(segment).forEach(plan => {
-                    plan.additionalUsers.count = 0;
-                    plan.additionalPdvs.count = 0;
-                    plan.optionalModules.forEach(mod => {
-                        if (mod.quantifiable) mod.count = 0;
-                        else mod.selected = false;
-                    });
-                });
-            });
+        },
+
+        selectPlan(key) {
+            if (this.marketSegment === 'varejo') return;
+            this.selectedPlanKey = key;
+            if (key === null) return;
+            this.resetAllPlanInstances();
+            this.applyDefaultsForCurrentPlan();
+        },
+
+        setMarketSegment(market) {
+            this.resetAllPlanInstances();
+            this.marketSegment = market;
+            this.selectedPlanKey = null;
+            if (market === 'food') {
+                this.selectedSegment = 'balcao';
+                this.selectPlan(null);
+            } else if (market === 'outros') {
+                this.selectedSegment = null;
+            } else {
+                this.selectedSegment = null;
+            }
         },
         
         setSegment(segment) {
             this.selectedSegment = segment;
-            this.selectPlan(null);
+            if (this.marketSegment === 'varejo') {
+                this.selectedPlanKey = null;
+                this.resetAllPlanInstances();
+                this.applyDefaultsForCurrentPlan();
+            } else {
+                this.selectPlan(null);
+            }
+        },
+
+        segmentLabel() {
+            if (!this.marketSegment) return '—';
+            if (this.marketSegment === 'varejo') {
+                const v = { pdv: 'PDV Básico', gestao: 'Plano Gestão', performance: 'Plano Performance' };
+                return `Varejo › ${v[this.selectedSegment] || this.selectedSegment || '—'}`;
+            }
+            if (this.marketSegment === 'outros') {
+                const o = { bling: 'Plano Bling', autoatendimento: 'Autoatendimento' };
+                return `Outros › ${o[this.selectedPlanKey] || this.selectedPlanKey || '—'}`;
+            }
+            const m = 'Food';
+            const labels = { balcao: 'Planos Balcão', delivery: 'Planos Delivery', deliveryBalcao: 'Planos Delivery + Balcão' };
+            const fam = labels[this.selectedSegment] || this.selectedSegment;
+            return `${m} › ${fam}`;
         },
         
         // MÉTODO MODIFICADO: toggleModule
@@ -392,6 +424,7 @@ function quoteCalculator() {
         },
 
         openDiscountModal() {
+            if (this.selectedPlan?.pricing && this.billingPeriod === 'mensal') return;
             this.tempDiscountPercentage = this.manualDiscountPercentage;
             this.tempFinalValue = null;
             this.isDiscountAuthorized = false;
@@ -411,45 +444,58 @@ function quoteCalculator() {
             if (!this.selectedPlan || this.tempFinalValue === null || this.tempFinalValue === '') {
                 return;
             }
-            
+
             const finalValue = parseFloat(this.tempFinalValue);
             if (isNaN(finalValue) || finalValue < 0) {
                 return;
             }
-            
-            // Calcula o subtotal atual
-            const base = this.selectedPlan.basePrice;
-            const addons = (this.selectedPlan.additionalUsers.count * this.selectedPlan.additionalUsers.price) + (this.selectedPlan.additionalPdvs.count * this.selectedPlan.additionalPdvs.price);
-            const optionals = this.selectedPlan.optionalModules.reduce((total, mod) => total + (mod.quantifiable ? mod.count * mod.price : (mod.selected ? mod.price : 0)), 0);
-            const subtotal = base + addons + optionals;
-            
-            // Calcula o valor da cortesia
+
+            const p = this.selectedPlan;
+            const addons = (p.additionalUsers.count * p.additionalUsers.price) + (p.additionalPdvs.count * p.additionalPdvs.price);
+            const optionals = p.optionalModules.reduce((total, mod) => total + (mod.quantifiable ? mod.count * mod.price : (mod.selected ? mod.price : 0)), 0);
             const courtesyValue = this.eligibleForCourtesy.find(m => m.name === this.courtesyModuleName)?.price || 0;
-            
-            // Calcula o valor elegível para desconto percentual
+
+            if (p.pricing && this.billingPeriod === 'anual') {
+                const ref = this.referenceBasePrice;
+                const R = ref + addons + optionals;
+                const courtesyRaw = this.eligibleForCourtesy.find(m => m.name === this.courtesyModuleName)?.price || 0;
+                const netRaw = R - courtesyRaw;
+                if (netRaw > 0 && finalValue >= 0 && finalValue <= netRaw) {
+                    this.tempDiscountPercentage = 100 * (1 - finalValue / netRaw);
+                } else {
+                    this.tempDiscountPercentage = 0;
+                }
+                if (this.tempDiscountPercentage < 0) this.tempDiscountPercentage = 0;
+                if (this.tempDiscountPercentage > 100) this.tempDiscountPercentage = 100;
+                return;
+            }
+
+            if (p.pricing && this.billingPeriod === 'mensal') {
+                this.tempDiscountPercentage = 0;
+                return;
+            }
+
+            const base = this.recurringBasePrice;
+            const subtotal = base + addons + optionals;
             let amountEligibleForPercentageDiscount = base + addons;
-            this.selectedPlan.optionalModules.forEach(mod => {
+            p.optionalModules.forEach(mod => {
                 if (!this.noDiscountModules.has(mod.name) && (mod.selected || mod.count > 0)) {
                     amountEligibleForPercentageDiscount += mod.quantifiable ? mod.count * mod.price : mod.price;
                 }
             });
-            
             if (courtesyValue > 0 && !this.noDiscountModules.has(this.courtesyModuleName)) {
                 amountEligibleForPercentageDiscount -= courtesyValue;
             }
-            
-            // Calcula o desconto necessário para chegar ao valor final
+
             const totalReduction = subtotal - finalValue;
             const calculatedDiscountAmount = totalReduction - courtesyValue;
-            
-            // Calcula a porcentagem de desconto
+
             if (amountEligibleForPercentageDiscount > 0) {
                 this.tempDiscountPercentage = (calculatedDiscountAmount / amountEligibleForPercentageDiscount) * 100;
             } else {
                 this.tempDiscountPercentage = 0;
             }
-            
-            // Limita a porcentagem entre 0 e 100
+
             if (this.tempDiscountPercentage < 0) this.tempDiscountPercentage = 0;
             if (this.tempDiscountPercentage > 100) this.tempDiscountPercentage = 100;
         },
@@ -465,13 +511,15 @@ function quoteCalculator() {
             // Verifica se há cortesia selecionada
             const hasCourtesy = this.courtesyModuleName !== null && this.courtesyModuleName !== '';
             
-            // Se desconto > 20%, requer autorização (com ou sem cortesia)
-            // Com cortesia: desconto máximo permitido sem autorização é 20%
-            // Sem cortesia: desconto máximo permitido sem autorização é 20%
+            // Acima de 20% exige autorização; no anual com tabela, o % da fidelidade (ex.: ~20,08%) não conta como "extra"
             if (this.tempDiscountPercentage > 20) {
-                this.discountRuleError = '🚫';
-                // Não mostra o modal automaticamente, apenas o botão no template
-                return;
+                const tableFid = this.selectedPlan?.pricing && this.billingPeriod === 'anual'
+                    ? this.fidelityDefaultPercent(this.selectedPlan)
+                    : null;
+                if (tableFid == null || this.tempDiscountPercentage > tableFid + 0.01) {
+                    this.discountRuleError = '🚫';
+                    return;
+                }
             }
             
             if (this.tempDiscountPercentage < 0) this.tempDiscountPercentage = 0;
@@ -550,12 +598,12 @@ function quoteCalculator() {
 
         submitLead() {
             this.leadFormError = '';
-            if (!this.clientName.trim() || !this.clientCPF.trim()) {
-                this.leadFormError = 'Por favor, preencha o Nome e o CPF.';
-                return;
-            }
-            const namePart = this.clientName.trim().substring(0, 3).toUpperCase();
-            const docPart = this.clientCPF.trim().replace(/\D/g, '').slice(-4);
+            const nameRaw = this.clientName.trim();
+            const letters = nameRaw.replace(/[^a-zA-ZÀ-ÿ]/g, '');
+            let namePart = letters.substring(0, 3).toUpperCase();
+            if (namePart.length < 3) namePart = (namePart + 'CPG').substring(0, 3);
+            const docDigits = `${this.clientCPF || ''}${this.clientCNPJ || ''}`.replace(/\D/g, '');
+            const docPart = docDigits.length >= 4 ? docDigits.slice(-4) : String(Math.floor(1000 + Math.random() * 9000));
             this.generatedCouponCode = `${namePart}${docPart}`;
             this.annualSavings = (this.summary.subtotal - this.summary.finalTotal) * 12;
             const expiryDate = new Date(this.closingDate);
@@ -911,30 +959,30 @@ function quoteCalculator() {
             doc.text(`Código: ${this.generatedCouponCode}`, PAGE_WIDTH - MARGIN, y, { align: 'right' });
             y += 10;
 
-            // Seção: Dados do Cliente (Melhorado)
+            // Seção: Dados do Cliente (campos opcionais)
             await checkPageBreak(40);
             y = drawSectionTitle(doc, 'DADOS DO CLIENTE', y);
 
             doc.setFontSize(10);
             doc.setFont(FONT_REGULAR, 'normal');
             doc.setTextColor(MEDIUM_GRAY);
-            doc.text(`Nome: ${this.clientName}`, MARGIN, y);
-            y += 5;
-            if (this.clientCPF) {
-                doc.text(`CPF: ${this.clientCPF}`, MARGIN, y);
+            const clientLines = [];
+            if (String(this.clientName || '').trim()) clientLines.push(`Nome: ${this.clientName.trim()}`);
+            if (String(this.clientEmail || '').trim()) clientLines.push(`E-mail: ${this.clientEmail.trim()}`);
+            if (String(this.clientCNPJ || '').trim()) clientLines.push(`CNPJ: ${this.clientCNPJ.trim()}`);
+            if (String(this.clientPhone || '').trim()) clientLines.push(`Telefone: ${this.clientPhone.trim()}`);
+            if (this.clientCPF && String(this.clientCPF).trim()) clientLines.push(`CPF: ${this.clientCPF.trim()}`);
+            clientLines.forEach((line) => {
+                doc.text(line, MARGIN, y);
                 y += 5;
-            }
-            if (this.clientCNPJ) {
-                doc.text(`CNPJ: ${this.clientCNPJ}`, MARGIN, y);
-                y += 5;
-            }
-            if (this.clientObservation) {
-                y += 5;
+            });
+            if (this.clientObservation && String(this.clientObservation).trim()) {
+                y += 2;
                 doc.setFont(FONT_BOLD, 'bold');
                 doc.text('Observações:', MARGIN, y);
                 doc.setFont(FONT_REGULAR, 'normal');
                 y += 5;
-                const obsLines = doc.splitTextToSize(this.clientObservation, PAGE_WIDTH - MARGIN * 2);
+                const obsLines = doc.splitTextToSize(this.clientObservation.trim(), PAGE_WIDTH - MARGIN * 2);
                 doc.text(obsLines, MARGIN, y);
                 y += obsLines.length * 4 + 2;
             }
@@ -954,16 +1002,28 @@ function quoteCalculator() {
                 doc.setDrawColor(accentRgb2.r, accentRgb2.g, accentRgb2.b);
             }
             doc.setLineWidth(0.5);
-            doc.roundedRect(MARGIN, y, PAGE_WIDTH - MARGIN * 2, 32, 4, 4, 'FD');
+            const hasPayLine = !!(this.selectedPlan.pricing);
+            const hasExtrasCard = (this.summary.taxaAdesao > 0 || this.summary.setupCost > 0);
+            const cardHeight = hasExtrasCard ? 46 : (hasPayLine ? 36 : 32);
+            doc.roundedRect(MARGIN, y, PAGE_WIDTH - MARGIN * 2, cardHeight, 4, 4, 'FD');
             
             doc.setFontSize(11);
             doc.setFont(FONT_REGULAR, 'normal');
             doc.setTextColor(DARK_GRAY);
             doc.text(`Plano: ${this.selectedPlan.name}`, MARGIN + 5, y + 10);
-            doc.text(`Segmento: ${this.selectedSegment === 'food' ? 'Food Service' : (this.selectedSegment === 'varejo' ? 'Varejo' : 'Outros')}`, MARGIN + 5, y + 17);
+            doc.text(`Família de planos: ${this.segmentLabel()}`, MARGIN + 5, y + 17);
+            const payLabel = this.selectedPlan.pricing
+                ? (this.billingPeriod === 'anual' ? 'Pagamento: anual (mensalidade tabela anual)' : 'Pagamento: mensal')
+                : '';
+            if (payLabel) {
+                doc.setFontSize(9);
+                doc.text(payLabel, MARGIN + 5, y + 24);
+                doc.setFontSize(11);
+            }
             
             doc.setFont(FONT_REGULAR, 'normal');
-            doc.text('VALOR MENSAL', PAGE_WIDTH - MARGIN - 5, y + 10, { align: 'right' });
+            const valorTopoLabel = this.billingPeriod === 'anual' && this.selectedPlan.pricing ? 'VALOR MENSAL (plano anual)' : 'VALOR MENSAL';
+            doc.text(valorTopoLabel, PAGE_WIDTH - MARGIN - 5, y + 10, { align: 'right' });
             doc.setFontSize(22);
             doc.setFont(FONT_BOLD, 'bold');
             const accentRgb3 = hexToRgb(ACCENT_COLOR);
@@ -972,7 +1032,17 @@ function quoteCalculator() {
             }
             doc.text(`R$ ${this.summary.finalTotal.toFixed(2).replace('.', ',')}`, PAGE_WIDTH - MARGIN - 5, y + 20, { align: 'right' });
             
-            // Mostra custo de setup se houver
+            // Taxa de adesão / setup (1º mês)
+            let extraY = 27;
+            if (this.summary.taxaAdesao > 0) {
+                doc.setFontSize(9);
+                doc.setFont(FONT_REGULAR, 'normal');
+                const taxaRgb = hexToRgb('#B45309');
+                if (taxaRgb) doc.setTextColor(taxaRgb.r, taxaRgb.g, taxaRgb.b);
+                doc.text(`+ Taxa de adesão: R$ ${this.summary.taxaAdesao.toFixed(2).replace('.', ',')}`, PAGE_WIDTH - MARGIN - 5, y + extraY, { align: 'right' });
+                doc.setTextColor(DARK_GRAY);
+                extraY += 5;
+            }
             if (this.summary.setupCost > 0) {
                 doc.setFontSize(9);
                 doc.setFont(FONT_REGULAR, 'normal');
@@ -980,17 +1050,33 @@ function quoteCalculator() {
                 if (setupOrangeRgb) {
                     doc.setTextColor(setupOrangeRgb.r, setupOrangeRgb.g, setupOrangeRgb.b);
                 }
-                doc.text(`+ Setup: R$ ${this.summary.setupCost.toFixed(2).replace('.', ',')} (1º mês)`, PAGE_WIDTH - MARGIN - 5, y + 27, { align: 'right' });
+                doc.text(`+ Setup módulos: R$ ${this.summary.setupCost.toFixed(2).replace('.', ',')} (1º mês)`, PAGE_WIDTH - MARGIN - 5, y + extraY, { align: 'right' });
+                doc.setTextColor(DARK_GRAY);
+                extraY += 5;
+            }
+            if (this.summary.taxaAdesao > 0 || this.summary.setupCost > 0) {
+                doc.setFont(FONT_BOLD, 'bold');
+                doc.setFontSize(9);
+                doc.text(`Total 1º mês: R$ ${this.summary.totalFirstMonth.toFixed(2).replace('.', ',')}`, PAGE_WIDTH - MARGIN - 5, y + extraY, { align: 'right' });
+                doc.setFont(FONT_REGULAR, 'normal');
             }
             
-            y += 35;
+            y += cardHeight + 6;
 
             // Detalhamento de Valores
             doc.setFontSize(10);
             doc.setFont(FONT_REGULAR, 'normal');
             doc.setTextColor(MEDIUM_GRAY);
-            doc.text(`Subtotal: R$ ${this.summary.subtotal.toFixed(2).replace('.', ',')}`, PAGE_WIDTH - MARGIN, y, { align: 'right' });
+            doc.text(`Subtotal recorrente: R$ ${this.summary.subtotal.toFixed(2).replace('.', ',')}`, PAGE_WIDTH - MARGIN, y, { align: 'right' });
             y += 5;
+            if (this.summary.taxaAdesao > 0) {
+                const taxaRgb2 = hexToRgb('#B45309');
+                if (taxaRgb2) doc.setTextColor(taxaRgb2.r, taxaRgb2.g, taxaRgb2.b);
+                doc.text(`Taxa de adesão (única): R$ ${this.summary.taxaAdesao.toFixed(2).replace('.', ',')}`, PAGE_WIDTH - MARGIN, y, { align: 'right' });
+                const mediumGrayRgbT = hexToRgb(MEDIUM_GRAY);
+                if (mediumGrayRgbT) doc.setTextColor(mediumGrayRgbT.r, mediumGrayRgbT.g, mediumGrayRgbT.b);
+                y += 5;
+            }
             if (this.summary.setupCost > 0) {
                 const setupGrayRgb = hexToRgb('#F97316'); // Laranja
                 if (setupGrayRgb) {
@@ -1008,7 +1094,8 @@ function quoteCalculator() {
                 y += 5;
             }
             if (this.summary.calculatedDiscountAmount > 0) {
-                doc.text(`Desconto (${this.manualDiscountPercentage.toFixed(2).replace('.', ',')}%): - R$ ${this.summary.calculatedDiscountAmount.toFixed(2).replace('.', ',')}`, PAGE_WIDTH - MARGIN, y, { align: 'right' });
+                const dpct = this.effectiveManualDiscountPercent;
+                doc.text(`Desconto comercial (${dpct.toFixed(2).replace('.', ',')}%): - R$ ${this.summary.calculatedDiscountAmount.toFixed(2).replace('.', ',')}`, PAGE_WIDTH - MARGIN, y, { align: 'right' });
                 y += 5;
             }
             y += 10;
@@ -1174,7 +1261,7 @@ function quoteCalculator() {
             if (darkGrayRgbTraining) {
                 doc.setTextColor(darkGrayRgbTraining.r, darkGrayRgbTraining.g, darkGrayRgbTraining.b);
             }
-            doc.text('Até R$199,00 (Plano PDV Básico)', MARGIN, y);
+            doc.text('Até R$299,00 (planos Básico)', MARGIN, y);
             doc.setFont(FONT_REGULAR, 'normal');
             if (mediumGrayRgbTraining) {
                 doc.setTextColor(mediumGrayRgbTraining.r, mediumGrayRgbTraining.g, mediumGrayRgbTraining.b);
@@ -1186,7 +1273,7 @@ function quoteCalculator() {
             if (darkGrayRgbTraining) {
                 doc.setTextColor(darkGrayRgbTraining.r, darkGrayRgbTraining.g, darkGrayRgbTraining.b);
             }
-            doc.text('De R$199,01 a R$299,00 (Plano Gestão)', MARGIN, y);
+            doc.text('De R$299,01 a R$599,00 (planos Gestão)', MARGIN, y);
             doc.setFont(FONT_REGULAR, 'normal');
             if (mediumGrayRgbTraining) {
                 doc.setTextColor(mediumGrayRgbTraining.r, mediumGrayRgbTraining.g, mediumGrayRgbTraining.b);
@@ -1198,7 +1285,7 @@ function quoteCalculator() {
             if (darkGrayRgbTraining) {
                 doc.setTextColor(darkGrayRgbTraining.r, darkGrayRgbTraining.g, darkGrayRgbTraining.b);
             }
-            doc.text('De R$299,01 a R$399,00 (Plano Performance)', MARGIN, y);
+            doc.text('De R$599,01 a R$849,00 (planos Avançado)', MARGIN, y);
             doc.setFont(FONT_REGULAR, 'normal');
             if (mediumGrayRgbTraining) {
                 doc.setTextColor(mediumGrayRgbTraining.r, mediumGrayRgbTraining.g, mediumGrayRgbTraining.b);
@@ -1210,7 +1297,7 @@ function quoteCalculator() {
             if (darkGrayRgbTraining) {
                 doc.setTextColor(darkGrayRgbTraining.r, darkGrayRgbTraining.g, darkGrayRgbTraining.b);
             }
-            doc.text('A partir de R$399,01 (Plano Personalizado etc)', MARGIN, y);
+            doc.text('A partir de R$849,01 (planos personalizados / corporativos)', MARGIN, y);
             doc.setFont(FONT_REGULAR, 'normal');
             if (mediumGrayRgbTraining) {
                 doc.setTextColor(mediumGrayRgbTraining.r, mediumGrayRgbTraining.g, mediumGrayRgbTraining.b);
@@ -1726,7 +1813,8 @@ Caso deseje, você poderá adquirir mais treinamentos com duração de 01h:30min
             // Rodapé
             drawFooter(doc);
             
-            const fileName = `Proposta-${this.clientName.replace(/ /g, '_')}-${generationDate}.pdf`;
+            const safeClientSlug = (String(this.clientName || '').trim() || 'Cliente').replace(/[^\w\-]+/g, '_');
+            const fileName = `Proposta-${safeClientSlug}-${generationDate}.pdf`;
             doc.save(fileName);
             
             // Mostra animação de sucesso
@@ -1739,22 +1827,44 @@ Caso deseje, você poderá adquirir mais treinamentos com duração de 01h:30min
 
         handleKeyPress(e) {
             if (this.showDiscountModal) return;
-            const allSegments = Object.keys(this.planData); // Get all segments
-            const currentSegmentIndex = allSegments.indexOf(this.selectedSegment);
-            
             if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
                 e.preventDefault();
-                let newSegmentIndex = currentSegmentIndex;
-                if (e.key === 'ArrowRight') {
-                    newSegmentIndex = (currentSegmentIndex + 1) % allSegments.length;
-                } else { // ArrowLeft
-                    newSegmentIndex = (currentSegmentIndex - 1 + allSegments.length) % allSegments.length;
+                if (!this.marketSegment) return;
+                if (this.marketSegment === 'food') {
+                    const allSegments = Object.keys(this.planData.food).filter((id) => id !== 'outros');
+                    const currentSegmentIndex = Math.max(0, allSegments.indexOf(this.selectedSegment));
+                    let newSegmentIndex = currentSegmentIndex;
+                    if (e.key === 'ArrowRight') {
+                        newSegmentIndex = (currentSegmentIndex + 1) % allSegments.length;
+                    } else {
+                        newSegmentIndex = (currentSegmentIndex - 1 + allSegments.length) % allSegments.length;
+                    }
+                    this.setSegment(allSegments[newSegmentIndex]);
+                } else if (this.marketSegment === 'varejo') {
+                    const order = ['pdv', 'gestao', 'performance'];
+                    const cur = this.selectedSegment ? order.indexOf(this.selectedSegment) : 0;
+                    const base = cur === -1 ? 0 : cur;
+                    const newIdx = e.key === 'ArrowRight'
+                        ? (base + 1) % order.length
+                        : (base - 1 + order.length) % order.length;
+                    this.setSegment(order[newIdx]);
+                } else if (this.marketSegment === 'outros') {
+                    const order = ['bling', 'autoatendimento'];
+                    const cur = this.selectedPlanKey ? order.indexOf(this.selectedPlanKey) : 0;
+                    const base = cur === -1 ? 0 : cur;
+                    const newIdx = e.key === 'ArrowRight'
+                        ? (base + 1) % order.length
+                        : (base - 1 + order.length) % order.length;
+                    this.selectPlan(order[newIdx]);
                 }
-                this.setSegment(allSegments[newSegmentIndex]);
-                return; // Handle segment change, then return
+                return;
             }
 
-            const planKeys = Object.keys(this.planData[this.selectedSegment]);
+            if (!this.marketSegment || this.marketSegment === 'varejo') return;
+
+            const planKeys = this.marketSegment === 'outros'
+                ? Object.keys(this.planData.food.outros || {})
+                : Object.keys(this.planData.food[this.selectedSegment]);
             let currentIndex = planKeys.indexOf(this.selectedPlanKey);
             if (e.key === 'ArrowDown') {
                 e.preventDefault();

@@ -7,6 +7,15 @@
     box-sizing: border-box;
 }
 
+:root {
+    --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    --color-text: #0f172a;
+    --color-surface: #ffffff;
+    --brand-600: #0284c7;
+    --brand-700: #0369a1;
+    --brand-800: #075985;
+}
+
 html {
     font-size: 16px;
     -webkit-font-smoothing: antialiased;
@@ -14,10 +23,32 @@ html {
 }
 
 body {
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-    line-height: 1.5;
-    color: #1F2937;
-    background-color: #F9FAFB;
+    font-family: var(--font-sans);
+    line-height: 1.55;
+    color: var(--color-text);
+    background: linear-gradient(165deg, #f8fafc 0%, #f1f5f9 48%, #e2e8f0 100%);
+    background-attachment: fixed;
+    min-height: 100vh;
+}
+
+.app-body {
+    font-family: var(--font-sans);
+    color: var(--color-text);
+    min-height: 100vh;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+    .plan-card:hover,
+    .plan-card.selected {
+        transform: none !important;
+    }
 }
 
 /* ============================================
@@ -227,6 +258,16 @@ body {
     padding-bottom: 0.75rem;
 }
 
+.py-6 {
+    padding-top: 1.5rem;
+    padding-bottom: 1.5rem;
+}
+
+.py-10 {
+    padding-top: 2.5rem;
+    padding-bottom: 2.5rem;
+}
+
 .pt-4 {
     padding-top: 1rem;
 }
@@ -359,11 +400,19 @@ body {
 }
 
 .bg-blue-50 {
-    background-color: #EFF6FF;
+    background-color: #f0f9ff;
+}
+
+.bg-sky-50 {
+    background-color: #f0f9ff;
+}
+
+.bg-slate-50 {
+    background-color: #f8fafc;
 }
 
 .bg-blue-600 {
-    background-color: #2563EB;
+    background-color: var(--brand-700);
 }
 
 .bg-green-50 {
@@ -419,11 +468,27 @@ body {
 }
 
 .text-blue-600 {
-    color: #2563EB;
+    color: var(--brand-600);
 }
 
 .text-blue-800 {
-    color: #1E40AF;
+    color: var(--brand-800);
+}
+
+.text-slate-500 {
+    color: #64748b;
+}
+
+.text-slate-600 {
+    color: #475569;
+}
+
+.text-slate-800 {
+    color: #1e293b;
+}
+
+.text-slate-900 {
+    color: #0f172a;
 }
 
 .text-green-500 {
@@ -489,6 +554,11 @@ body {
 .text-sm {
     font-size: 0.875rem;
     line-height: 1.25rem;
+}
+
+.text-base {
+    font-size: 1rem;
+    line-height: 1.6;
 }
 
 .text-lg {
@@ -566,6 +636,14 @@ body {
     letter-spacing: 0.025em;
 }
 
+.tracking-widest {
+    letter-spacing: 0.12em;
+}
+
+.tracking-tight {
+    letter-spacing: -0.025em;
+}
+
 .uppercase {
     text-transform: uppercase;
 }
@@ -618,15 +696,19 @@ body {
 }
 
 .border-blue-200 {
-    border-color: #BFDBFE;
+    border-color: #bae6fd;
 }
 
 .border-blue-400 {
-    border-color: #60A5FA;
+    border-color: #38bdf8;
 }
 
 .border-blue-500 {
-    border-color: #3B82F6;
+    border-color: #0ea5e9;
+}
+
+.border-slate-200 {
+    border-color: #e2e8f0;
 }
 
 .border-emerald-200 {
@@ -635,10 +717,6 @@ body {
 
 .border-gray-300 {
     border-color: #D1D5DB;
-}
-
-.border-blue-200 {
-    border-color: #BFDBFE;
 }
 
 .border-yellow-200 {
@@ -726,6 +804,10 @@ body {
     left: 0;
 }
 
+.top-6 {
+    top: 1.5rem;
+}
+
 .top-8 {
     top: 2rem;
 }
@@ -809,7 +891,7 @@ body {
 }
 
 .hover\:bg-blue-700:hover {
-    background-color: #1D4ED8;
+    background-color: var(--brand-800);
 }
 
 .hover\:bg-green-700:hover {
@@ -855,30 +937,39 @@ body {
 
 /* Modal */
 .modal {
-    background-color: rgba(0, 0, 0, 0.5);
+    background-color: rgba(15, 23, 42, 0.48);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
     transition: opacity 0.3s ease;
 }
 
-/* Plan Card */
+.backdrop-scrim {
+    background-color: rgba(15, 23, 42, 0.55);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+
+/* Plan Card — hover sem salto de layout (só sombra) */
 .plan-card {
-    transition: transform 0.3s, box-shadow 0.3s, border-color 0.3s;
+    transition: box-shadow 0.25s ease, border-color 0.25s ease;
 }
 
 .plan-card:hover {
-    transform: translateY(-4px);
+    transform: none;
+    box-shadow: 0 12px 28px -10px rgba(15, 23, 42, 0.14);
 }
 
 .plan-card.selected {
-    border-color: #3B82F6;
-    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-    transform: translateY(-4px);
+    border-color: #0ea5e9;
+    box-shadow: 0 20px 40px -12px rgba(14, 165, 233, 0.22);
+    transform: none;
 }
 
 /* Card de melhor custo-benefício */
 .best-value-card {
     border-width: 2px;
-    border-color: #2563EB; /* azul da borda */
-    background-image: linear-gradient(to top, #bee8ff 0%, #e0ecff 45%, #ffffff 100%);
+    border-color: #0284c7;
+    background-image: linear-gradient(165deg, #e0f2fe 0%, #f0f9ff 40%, #ffffff 100%);
     position: relative;
     overflow: hidden;
 }
@@ -896,9 +987,9 @@ body {
 }
 
 .plan-badge-primary {
-    background-color: #2563EB;
+    background: linear-gradient(135deg, #0369a1 0%, #0284c7 100%);
     color: #FFFFFF;
-    box-shadow: 0 4px 10px rgba(37, 99, 235, 0.35);
+    box-shadow: 0 4px 12px rgba(3, 105, 161, 0.35);
 }
 
 .plan-badge-secondary {
@@ -932,8 +1023,8 @@ body {
 
 .form-input:focus {
     outline: none;
-    border-color: #2563EB;
-    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.5);
+    border-color: #0284c7;
+    box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.35);
 }
 
 .form-input.text-center {
@@ -944,8 +1035,8 @@ body {
 .module-row:focus,
 .module-row.focused {
     outline: none;
-    background-color: #EFF6FF;
-    box-shadow: 0 0 0 2px #2563EB;
+    background-color: #f0f9ff;
+    box-shadow: 0 0 0 2px #0284c7;
 }
 
 /* Slider */
@@ -964,7 +1055,7 @@ body {
     width: 20px;
     height: 20px;
     border-radius: 50%;
-    background: #2563EB;
+    background: #0284c7;
     cursor: pointer;
 }
 
@@ -972,7 +1063,7 @@ body {
     width: 20px;
     height: 20px;
     border-radius: 50%;
-    background: #2563EB;
+    background: #0284c7;
     cursor: pointer;
     border: none;
 }
@@ -997,8 +1088,8 @@ input[type="checkbox"] {
 }
 
 input[type="checkbox"]:checked {
-    background-color: #2563EB;
-    border-color: #2563EB;
+    background-color: #0284c7;
+    border-color: #0284c7;
 }
 
 input[type="radio"] {
@@ -1171,6 +1262,25 @@ button:focus {
         padding-right: 1.5rem;
     }
 
+    .sm\:py-10 {
+        padding-top: 2.5rem;
+        padding-bottom: 2.5rem;
+    }
+
+    .sm\:text-5xl {
+        font-size: 3rem;
+        line-height: 1.05;
+    }
+
+    .sm\:text-lg {
+        font-size: 1.125rem;
+        line-height: 1.75rem;
+    }
+
+    .sm\:mb-16 {
+        margin-bottom: 4rem;
+    }
+
     .sm\:grid-cols-2 {
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
@@ -1211,6 +1321,14 @@ button:focus {
     .lg\:px-8 {
         padding-left: 2rem;
         padding-right: 2rem;
+    }
+
+    .lg\:gap-12 {
+        gap: 3rem;
+    }
+
+    .lg\:ml-6 {
+        margin-left: 1.5rem;
     }
 
     .lg\:col-span-1 {
@@ -1269,6 +1387,14 @@ button:focus {
     width: 1.5rem;
 }
 
+.w-7 {
+    width: 1.75rem;
+}
+
+.w-12 {
+    width: 3rem;
+}
+
 .h-2 {
     height: 0.5rem;
 }
@@ -1283,6 +1409,14 @@ button:focus {
 
 .h-6 {
     height: 1.5rem;
+}
+
+.h-7 {
+    height: 1.75rem;
+}
+
+.h-12 {
+    height: 3rem;
 }
 
 .mr-1 {
@@ -1361,12 +1495,16 @@ svg {
 }
 
 .from-blue-600 {
-    --tw-gradient-from: #2563EB;
-    --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, rgba(37, 99, 235, 0));
+    --tw-gradient-from: #0284c7;
+    --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, rgba(2, 132, 199, 0));
 }
 
 .to-blue-800 {
-    --tw-gradient-to: #1E40AF;
+    --tw-gradient-to: #075985;
+}
+
+.to-slate-900 {
+    --tw-gradient-to: #0f172a;
 }
 
 .from-white {
@@ -1440,7 +1578,7 @@ svg {
 }
 
 .hover\:text-blue-700:hover {
-    color: #1D4ED8;
+    color: var(--brand-800);
 }
 
 .hover\:-translate-y-1:hover {
@@ -1448,7 +1586,107 @@ svg {
 }
 
 .group:hover .group-hover\:text-blue-700 {
-    color: #1D4ED8;
+    color: var(--brand-800);
+}
+
+.group:hover .group-hover\:bg-sky-50 {
+    background-color: #f0f9ff;
+}
+
+.hover\:border-blue-300:hover {
+    border-color: #7dd3fc;
+}
+
+/* UI: seções e painéis */
+.section-eyebrow {
+    display: block;
+    font-size: 0.6875rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: #64748b;
+    margin-bottom: 0.35rem;
+}
+
+.section-title {
+    font-size: 1.5rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    line-height: 1.25;
+    color: #0f172a;
+}
+
+/** Espaço interno consistente — evita texto colado na borda do card */
+.panel-body {
+    padding-left: 1.25rem;
+    padding-right: 1.25rem;
+}
+
+@media (min-width: 640px) {
+    .panel-body {
+        padding-left: 1.5rem;
+        padding-right: 1.5rem;
+    }
+}
+
+/** Botões mercado Food / Varejo — tamanho padrão, conteúdo centralizado */
+.market-row-bottom {
+    margin-bottom: 15px;
+}
+
+.market-pill {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 10px;
+    min-width: 9.75rem;
+    box-sizing: border-box;
+}
+
+/** Famílias Food — rótulos longos (Planos Delivery + Balcão) */
+.plan-family-pill {
+    min-width: min(100%, 10.5rem);
+    max-width: 20rem;
+    flex: 1 1 10.5rem;
+    padding-left: 12px;
+    padding-right: 12px;
+}
+
+@media (min-width: 640px) {
+    .section-title {
+        font-size: 1.625rem;
+    }
+}
+
+.card-elevated {
+    box-shadow: 0 4px 24px -8px rgba(15, 23, 42, 0.1);
+}
+
+.summary-panel {
+    box-shadow: 0 8px 32px -12px rgba(15, 23, 42, 0.12);
+}
+
+.footer-bar {
+    position: relative;
+    background-color: rgba(255, 255, 255, 0.96);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border-top: 1px solid #e2e8f0;
+    box-shadow: 0 -10px 40px -16px rgba(15, 23, 42, 0.14);
+}
+
+.max-h-90vh {
+    max-height: 90vh;
+}
+
+.focus-visible\:ring-4:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 4px rgba(125, 211, 252, 0.45);
+}
+
+.min-h-12 {
+    min-height: 3rem;
 }
 
 .transition-all {
