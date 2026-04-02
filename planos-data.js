@@ -1258,7 +1258,7 @@ const PLAN_DATA_VAREJO = {
         fixedModules: [
             "5x Usuários",
             "2x PDV - Frente de Caixa",
-            "3x Smart TEF",
+            "2x Smart TEF",
             "Produção",
             "Promoções",
             "Notas Fiscais Ilimitadas",
