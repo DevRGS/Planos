@@ -402,19 +402,7 @@
                         <div x-show="summary.optionals > 0" class="flex justify-between" x-transition><span>Módulos Opcionais</span> <span class="summary-value">R$ <span x-text="summary.optionals.toFixed(2).replace('.', ',')"></span></span></div>
                         <hr>
                         <div class="flex justify-between font-bold text-xl"><span>Subtotal (recorrente)</span> <span class="summary-value">R$ <span x-text="summary.subtotal.toFixed(2).replace('.', ',')"></span></span></div>
-                        
-                        <div x-show="courtesyModuleName" class="flex justify-between text-blue-600" x-transition>
-                            <span>Cortesia: <span x-text="courtesyModuleName"></span></span>
-                            <span>- R$ <span x-text="summary.courtesyValue.toFixed(2).replace('.',',')"></span></span>
-                        </div>
-                        
-                        <div class="pt-4 border-t">
-                            <label for="closing-date" class="block text-sm font-medium text-gray-700 mb-1">Data de Fechamento</label>
-                            <div class="relative">
-                                <input type="text" id="closing-date" :value="new Date(closingDate + 'T00:00:00').toLocaleDateString('pt-BR')" @click="openClosingDateModal()" readonly class="form-input w-full cursor-pointer">
-                                <button type="button" @click="openClosingDateModal()" class="absolute right-2 top-1/2 -translate-y-1/2 text-blue-600 text-sm">(Editar)</button>
-                            </div>
-                        </div>
+                        <p class="text-xs text-gray-500" x-show="selectedPlan && selectedPlan.pricing && billingPeriod === 'anual'">Soma do plano + adicionais + opcionais na tabela mensal; o desconto comercial incide sobre este subtotal.</p>
 
                          <div x-show="(selectedPlan && selectedPlan.pricing && billingPeriod === 'anual') || (selectedPlan && !selectedPlan.pricing)" class="space-y-1">
                             <div class="flex justify-between text-red-600">
@@ -429,6 +417,19 @@
                             </p>
                         </div>
                         <p class="text-xs text-gray-500" x-show="selectedPlan && selectedPlan.pricing && billingPeriod === 'mensal'">No plano mensal não há desconto comercial percentual; o valor é o da tabela mensal.</p>
+
+                        <div x-show="courtesyModuleName" class="flex justify-between text-blue-600" x-transition>
+                            <span>Cortesia: <span x-text="courtesyModuleName"></span></span>
+                            <span>- R$ <span x-text="summary.courtesyValue.toFixed(2).replace('.',',')"></span></span>
+                        </div>
+                        
+                        <div class="pt-4 border-t">
+                            <label for="closing-date" class="block text-sm font-medium text-gray-700 mb-1">Data de Fechamento</label>
+                            <div class="relative">
+                                <input type="text" id="closing-date" :value="new Date(closingDate + 'T00:00:00').toLocaleDateString('pt-BR')" @click="openClosingDateModal()" readonly class="form-input w-full cursor-pointer">
+                                <button type="button" @click="openClosingDateModal()" class="absolute right-2 top-1/2 -translate-y-1/2 text-blue-600 text-sm">(Editar)</button>
+                            </div>
+                        </div>
                     </div>
                     
                     <div x-show="summary.taxaAdesao > 0 || summary.setupCost > 0" class="mt-4 pt-4 border-t border-dashed border-gray-200 space-y-2 text-base">

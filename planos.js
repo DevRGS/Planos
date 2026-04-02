@@ -186,12 +186,14 @@ function quoteCalculator() {
             if (p.pricing && this.billingPeriod === 'anual') {
                 const f = this.commercialDiscountFactor;
                 const pct = this.manualDiscountPercentage / 100;
+                /** Total em tabela mensal (plano + adicionais + opcionais) — base do desconto comercial. */
                 const R = referenceBase + addonsRaw + optionalsRaw;
-                planRecurring = referenceBase * f;
-                addons = addonsRaw * f;
-                optionals = optionalsRaw * f;
-                courtesyValue = courtesyRaw * f;
                 calculatedDiscountAmount = R * pct;
+                /** Linhas do resumo: valores de referência mensal (antes do desconto). */
+                planRecurring = referenceBase;
+                addons = addonsRaw;
+                optionals = optionalsRaw;
+                courtesyValue = courtesyRaw * f;
             } else if (p.pricing && this.billingPeriod === 'mensal') {
                 planRecurring = p.pricing.mensal.preco;
             } else {
@@ -216,8 +218,11 @@ function quoteCalculator() {
             let finalTotal;
             let totalReduction;
             if (p.pricing && this.billingPeriod === 'anual') {
-                finalTotal = subtotal - courtesyValue;
-                totalReduction = courtesyValue;
+                const R = referenceBase + addonsRaw + optionalsRaw;
+                const f = this.commercialDiscountFactor;
+                const netAfterCommercial = R * f;
+                finalTotal = netAfterCommercial - courtesyValue;
+                totalReduction = R - finalTotal;
             } else if (p.pricing && this.billingPeriod === 'mensal') {
                 finalTotal = subtotal - courtesyValue;
                 totalReduction = courtesyValue;
@@ -1080,6 +1085,15 @@ function quoteCalculator() {
             doc.setTextColor(MEDIUM_GRAY);
             doc.text(`Subtotal recorrente: R$ ${this.summary.subtotal.toFixed(2).replace('.', ',')}`, PAGE_WIDTH - MARGIN, y, { align: 'right' });
             y += 5;
+            if (this.summary.calculatedDiscountAmount > 0) {
+                const dpct = this.effectiveManualDiscountPercent;
+                doc.text(`Desconto comercial (${dpct.toFixed(2).replace('.', ',')}%): - R$ ${this.summary.calculatedDiscountAmount.toFixed(2).replace('.', ',')}`, PAGE_WIDTH - MARGIN, y, { align: 'right' });
+                y += 5;
+            }
+            if (this.summary.courtesyValue > 0) {
+                doc.text(`Cortesia (${this.courtesyModuleName}): - R$ ${this.summary.courtesyValue.toFixed(2).replace('.', ',')}`, PAGE_WIDTH - MARGIN, y, { align: 'right' });
+                y += 5;
+            }
             if (this.summary.taxaAdesao > 0) {
                 const taxaRgb2 = hexToRgb('#B45309');
                 if (taxaRgb2) doc.setTextColor(taxaRgb2.r, taxaRgb2.g, taxaRgb2.b);
@@ -1098,15 +1112,6 @@ function quoteCalculator() {
                 if (mediumGrayRgb2) {
                     doc.setTextColor(mediumGrayRgb2.r, mediumGrayRgb2.g, mediumGrayRgb2.b);
                 }
-                y += 5;
-            }
-            if (this.summary.courtesyValue > 0) {
-                doc.text(`Cortesia (${this.courtesyModuleName}): - R$ ${this.summary.courtesyValue.toFixed(2).replace('.', ',')}`, PAGE_WIDTH - MARGIN, y, { align: 'right' });
-                y += 5;
-            }
-            if (this.summary.calculatedDiscountAmount > 0) {
-                const dpct = this.effectiveManualDiscountPercent;
-                doc.text(`Desconto comercial (${dpct.toFixed(2).replace('.', ',')}%): - R$ ${this.summary.calculatedDiscountAmount.toFixed(2).replace('.', ',')}`, PAGE_WIDTH - MARGIN, y, { align: 'right' });
                 y += 5;
             }
             y += 10;
