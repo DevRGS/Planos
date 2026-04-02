@@ -1,11 +1,18 @@
 /**
  * Planos do mercado Varejo (mantidos manualmente; o build concatena em planos-data.js).
- * Sem `pricing`: mesma lógica antiga de desconto % sobre base + opcionais (ex.: 10%).
+ * Com `pricing` mensal/anual (taxa de adesão só no mensal), mesma lógica do Food no resumo.
  */
+/** Taxa de adesão 1ª mensalidade — alinhada a build-planos-data.mjs / planos Food */
+const TAXA_ADESAO_MENSAL = 250;
+
 export const PLAN_DATA_VAREJO = {
   pdv: {
     name: 'PDV Básico',
     basePrice: 221.11,
+    pricing: {
+      mensal: { preco: 221.11, taxa_adesao: TAXA_ADESAO_MENSAL },
+      anual: { preco: 199.0, taxa_adesao: 0 },
+    },
     baseUsers: 2,
     basePdvs: 1,
     fixedModules: [
@@ -33,6 +40,10 @@ export const PLAN_DATA_VAREJO = {
   gestao: {
     name: 'Plano Gestão',
     basePrice: 332.22,
+    pricing: {
+      mensal: { preco: 332.22, taxa_adesao: TAXA_ADESAO_MENSAL },
+      anual: { preco: 299.0, taxa_adesao: 0 },
+    },
     baseUsers: 3,
     basePdvs: 1,
     fixedModules: [
@@ -79,6 +90,10 @@ export const PLAN_DATA_VAREJO = {
   performance: {
     name: 'Plano Performance',
     basePrice: 443.33,
+    pricing: {
+      mensal: { preco: 443.33, taxa_adesao: TAXA_ADESAO_MENSAL },
+      anual: { preco: 399.0, taxa_adesao: 0 },
+    },
     baseUsers: 5,
     basePdvs: 2,
     fixedModules: [

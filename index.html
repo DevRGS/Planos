@@ -235,7 +235,7 @@
                             <h3 class="text-2xl font-bold text-gray-900 mb-3" x-text="plan.name"></h3>
                         <p class="text-sm text-gray-400 uppercase tracking-wide font-semibold mb-6 pb-4 border-b border-gray-100">Módulos inclusos</p>
                         <ul class="space-y-3 text-gray-900 flex-grow text-sm">
-                            <template x-for="item in plan.fixedModules" :key="item">
+                            <template x-for="item in sortModuleNames(plan.fixedModules)" :key="item">
                                 <li class="flex items-start">
                                     <svg class="w-5 h-5 text-emerald-500 mr-3 flex-shrink-0 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>
                                     <span class="leading-relaxed" x-text="item"></span>
@@ -267,7 +267,7 @@
                             <h3 class="text-2xl font-bold text-gray-900 mb-3" x-text="planData.varejo[opt.id].name"></h3>
                         <p class="text-sm text-gray-400 uppercase tracking-wide font-semibold mb-6 pb-4 border-b border-gray-100">Módulos inclusos</p>
                         <ul class="space-y-3 text-gray-900 flex-grow text-sm">
-                            <template x-for="item in planData.varejo[opt.id].fixedModules" :key="item">
+                            <template x-for="item in sortModuleNames(planData.varejo[opt.id].fixedModules)" :key="item">
                                 <li class="flex items-start">
                                     <svg class="w-5 h-5 text-emerald-500 mr-3 flex-shrink-0 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>
                                     <span class="leading-relaxed" x-text="item"></span>
@@ -299,7 +299,7 @@
                             <h3 class="text-2xl font-bold text-gray-900 mb-3" x-text="planData.food.outros[opt.id].name"></h3>
                         <p class="text-sm text-gray-400 uppercase tracking-wide font-semibold mb-6 pb-4 border-b border-gray-100">Módulos inclusos</p>
                         <ul class="space-y-3 text-gray-900 flex-grow text-sm">
-                            <template x-for="item in planData.food.outros[opt.id].fixedModules" :key="item">
+                            <template x-for="item in sortModuleNames(planData.food.outros[opt.id].fixedModules)" :key="item">
                                 <li class="flex items-start">
                                     <svg class="w-5 h-5 text-emerald-500 mr-3 flex-shrink-0 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>
                                     <span class="leading-relaxed" x-text="item"></span>
@@ -395,7 +395,7 @@
                     </p>
                     <div class="space-y-4 text-lg">
                         <div class="flex justify-between">
-                            <span>Plano base <span class="text-gray-400 text-sm font-normal" x-show="selectedPlan && selectedPlan.pricing" x-text="billingPeriod === 'anual' ? '(mensalidade com tabela anual)' : '(tabela mensal)'"></span></span>
+                            <span>Plano base <span class="text-gray-400 text-sm font-normal" x-show="selectedPlan && selectedPlan.pricing">(valor de referência do catálogo)</span></span>
                             <span class="summary-value">R$ <span x-text="summary.base.toFixed(2).replace('.', ',')"></span></span>
                         </div>
                         <div x-show="summary.addons > 0" class="flex justify-between" x-transition><span>Módulos Adicionais</span> <span class="summary-value">R$ <span x-text="summary.addons.toFixed(2).replace('.', ',')"></span></span></div>

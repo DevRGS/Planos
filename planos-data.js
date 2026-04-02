@@ -35,6 +35,7 @@ const PLAN_DATA_FOOD = {
             basePdvs: 1,
             fixedModules: [
                 "1x PDV - Frente de Caixa",
+                "Delivery Direto Básico",
                 "Relatório Básico",
                 "Relatório KDS",
                 "Importação de XML",
@@ -866,7 +867,17 @@ const PLAN_DATA_FOOD = {
                     selected: false,
                     count: 0
                 }
-            ]
+            ],
+            pricing: {
+                mensal: {
+                    preco: 276.67,
+                    taxa_adesao: 250
+                },
+                anual: {
+                    preco: 249,
+                    taxa_adesao: 0
+                }
+            }
         },
         autoatendimento: {
             name: "Plano Autoatendimento",
@@ -937,7 +948,17 @@ const PLAN_DATA_FOOD = {
                     quantifiable: false,
                     selected: false
                 }
-            ]
+            ],
+            pricing: {
+                mensal: {
+                    preco: 332.5,
+                    taxa_adesao: 250
+                },
+                anual: {
+                    preco: 299.25,
+                    taxa_adesao: 0
+                }
+            }
         }
     }
 };
@@ -947,6 +968,16 @@ const PLAN_DATA_VAREJO = {
     pdv: {
         name: "PDV Básico",
         basePrice: 221.11,
+        pricing: {
+            mensal: {
+                preco: 221.11,
+                taxa_adesao: 250
+            },
+            anual: {
+                preco: 199,
+                taxa_adesao: 0
+            }
+        },
         baseUsers: 2,
         basePdvs: 1,
         fixedModules: [
@@ -1025,6 +1056,16 @@ const PLAN_DATA_VAREJO = {
     gestao: {
         name: "Plano Gestão",
         basePrice: 332.22,
+        pricing: {
+            mensal: {
+                preco: 332.22,
+                taxa_adesao: 250
+            },
+            anual: {
+                preco: 299,
+                taxa_adesao: 0
+            }
+        },
         baseUsers: 3,
         basePdvs: 1,
         fixedModules: [
@@ -1202,6 +1243,16 @@ const PLAN_DATA_VAREJO = {
     performance: {
         name: "Plano Performance",
         basePrice: 443.33,
+        pricing: {
+            mensal: {
+                preco: 443.33,
+                taxa_adesao: 250
+            },
+            anual: {
+                preco: 399,
+                taxa_adesao: 0
+            }
+        },
         baseUsers: 5,
         basePdvs: 2,
         fixedModules: [

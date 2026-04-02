@@ -39,6 +39,14 @@ const PRICING_TABLE = {
   'deliveryBalcao:avancado': { mensal: { preco: 849, taxa_adesao: TAXA_ADESAO_MENSAL }, anual: { preco: 699, taxa_adesao: 0 } },
 };
 
+/** Mesma lógica do Varejo: mensal = basePrice da API; anual proporcional à tabela fidelidade. */
+const OUTROS_RATIO_ANUAL = {
+  /** Plano Bling — proporção Varejo PDV (199/221.11) */
+  bling: 199 / 221.11,
+  /** Autoatendimento — proporção Varejo Gestão (299/332.22) */
+  autoatendimento: 299 / 332.22,
+};
+
 function optionalRequires(name) {
   if (name === 'Hub de Delivery') return ['Delivery'];
   if (name.startsWith('Delivery Direto')) return ['Hub de Delivery'];
@@ -154,6 +162,15 @@ for (const on of outrosNames) {
   } else {
     plan.name = 'Plano Autoatendimento';
   }
+  const mensalPreco = plan.basePrice;
+  const ratio = OUTROS_RATIO_ANUAL[key];
+  plan.pricing = {
+    mensal: { preco: mensalPreco, taxa_adesao: TAXA_ADESAO_MENSAL },
+    anual: {
+      preco: Math.round(mensalPreco * ratio * 100) / 100,
+      taxa_adesao: 0,
+    },
+  };
   PLAN_DATA_FOOD.outros[key] = plan;
 }
 

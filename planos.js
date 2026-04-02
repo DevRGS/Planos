@@ -135,8 +135,10 @@ function quoteCalculator() {
 
         get filteredOptionalModules() {
             if (!this.selectedPlan) return [];
-            if (!this.searchQuery) return this.selectedPlan.optionalModules;
-            return this.selectedPlan.optionalModules.filter(mod => mod.name.toLowerCase().includes(this.searchQuery.toLowerCase()));
+            const mods = !this.searchQuery
+                ? this.selectedPlan.optionalModules
+                : this.selectedPlan.optionalModules.filter(mod => mod.name.toLowerCase().includes(this.searchQuery.toLowerCase()));
+            return [...mods].sort((a, b) => a.name.localeCompare(b.name, 'pt-BR', { sensitivity: 'base' }));
         },
 
         get tempFinalTotal() {
@@ -174,7 +176,8 @@ function quoteCalculator() {
 
             const courtesyRaw = this.eligibleForCourtesy.find(m => m.name === this.courtesyModuleName)?.price || 0;
 
-            let base;
+            /** Valor efetivo da mensalidade do plano na tabela escolhida (mensal ou anual). */
+            let planRecurring;
             let addons = addonsRaw;
             let optionals = optionalsRaw;
             let courtesyValue = courtesyRaw;
@@ -184,16 +187,16 @@ function quoteCalculator() {
                 const f = this.commercialDiscountFactor;
                 const pct = this.manualDiscountPercentage / 100;
                 const R = referenceBase + addonsRaw + optionalsRaw;
-                base = referenceBase * f;
+                planRecurring = referenceBase * f;
                 addons = addonsRaw * f;
                 optionals = optionalsRaw * f;
                 courtesyValue = courtesyRaw * f;
                 calculatedDiscountAmount = R * pct;
             } else if (p.pricing && this.billingPeriod === 'mensal') {
-                base = p.pricing.mensal.preco;
+                planRecurring = p.pricing.mensal.preco;
             } else {
-                base = this.recurringBasePrice;
-                let amountEligibleForPercentageDiscount = base + addonsRaw;
+                planRecurring = this.recurringBasePrice;
+                let amountEligibleForPercentageDiscount = planRecurring + addonsRaw;
                 p.optionalModules.forEach(mod => {
                     if (!this.noDiscountModules.has(mod.name) && (mod.selected || mod.count > 0)) {
                         amountEligibleForPercentageDiscount += mod.quantifiable ? mod.count * mod.price : mod.price;
@@ -205,7 +208,10 @@ function quoteCalculator() {
                 calculatedDiscountAmount = amountEligibleForPercentageDiscount * (this.manualDiscountPercentage / 100);
             }
 
-            const subtotal = base + addons + optionals;
+            const subtotal = planRecurring + addons + optionals;
+
+            /** Linha “Plano base” no resumo: sempre o basePrice do catálogo (não muda entre mensal/anual). */
+            const baseDisplay = typeof p.basePrice === 'number' ? p.basePrice : planRecurring;
 
             let finalTotal;
             let totalReduction;
@@ -225,7 +231,7 @@ function quoteCalculator() {
             const effectivePercentage = subtotal > 0 ? (totalReduction / subtotal) * 100 : 0;
 
             return {
-                base,
+                base: baseDisplay,
                 referenceBase,
                 addons,
                 optionals,
@@ -265,6 +271,12 @@ function quoteCalculator() {
                 }
             });
             window.addEventListener('keydown', (e) => this.handleKeyPress(e));
+        },
+
+        /** Lista de nomes de módulos para exibição (ordem A–Z, pt-BR). */
+        sortModuleNames(list) {
+            if (!list || !list.length) return [];
+            return [...list].sort((a, b) => String(a).localeCompare(String(b), 'pt-BR', { sensitivity: 'base' }));
         },
 
         login() { if (this.password) { this.loggedIn = true; this.loginError = false; } else { this.loginError = true; } },
@@ -749,7 +761,6 @@ function quoteCalculator() {
                         'Itaú Unibanco',
                         'Banco SICREDI',
                         'Banco do Brasil',
-                        'Banco SICOOB',
                         'Banco Bradesco',
                         'Banco Santander',
                         'Banco VerdeCard / Quero Quero Pag'
@@ -1146,7 +1157,7 @@ function quoteCalculator() {
             const availableWidthMod = PAGE_WIDTH - MARGIN * 2;
             const columnWMod = (availableWidthMod - COLUMN_GAP_MOD) / COLUMN_COUNT_MOD;
 
-            const fixedModulesList = this.selectedPlan.fixedModules;
+            const fixedModulesList = this.sortModuleNames(this.selectedPlan.fixedModules);
             const itemsColuna1 = fixedModulesList.slice(0, MAX_ITENS_COLUNA_1);
             const itemsColuna2 = fixedModulesList.slice(MAX_ITENS_COLUNA_1);
 
@@ -1201,7 +1212,9 @@ function quoteCalculator() {
                 y += 5;
             }
 
-            const selectedOptionalModules = this.selectedPlan.optionalModules.filter(mod => mod.selected || (mod.quantifiable && mod.count > 0));
+            const selectedOptionalModules = this.selectedPlan.optionalModules
+                .filter(mod => mod.selected || (mod.quantifiable && mod.count > 0))
+                .sort((a, b) => a.name.localeCompare(b.name, 'pt-BR', { sensitivity: 'base' }));
             if (selectedOptionalModules.length > 0) {
                 await checkPageBreak(30);
                 doc.setFontSize(10);
