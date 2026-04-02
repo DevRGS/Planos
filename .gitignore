@@ -1,0 +1,43 @@
+# Dependências (se passar a usar npm/yarn/pnpm)
+node_modules/
+
+# Python (scripts, skills, venv local)
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.Python
+*.egg-info/
+.eggs/
+dist/
+build/
+
+# Logs e temporários
+*.log
+npm-debug.log*
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Ambiente e segredos
+.env
+.env.*
+!.env.example
+
+# IDEs e editores
+.cursor/
+.idea/
+*.swp
+*.swo
+*~
+
+# Cache e ferramentas
+.cache/
+.turbo/
+.parcel-cache/
+
+# Sistema de ficheiros / cópias
+*.bak
+*.tmp
+*.temp
