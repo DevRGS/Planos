@@ -35,12 +35,12 @@ const PLAN_DATA_FOOD = {
             basePdvs: 1,
             fixedModules: [
                 "1x PDV - Frente de Caixa",
-                "Delivery Direto Básico",
+                "2x Usuários",
                 "Relatório Básico",
                 "Relatório KDS",
                 "Importação de XML",
+                "Estoque em Grade",
                 "Controle de Mesas",
-                "2x Usuários",
                 "Suporte Técnico - Via chamados",
                 "Notas Fiscais Ilimitadas"
             ],
@@ -296,15 +296,15 @@ const PLAN_DATA_FOOD = {
             baseUsers: 2,
             basePdvs: 1,
             fixedModules: [
-                "Pedidos masketplace delivery mês",
+                "Pedidos Marketplace delivery mês",
                 "1x PDV - Frente de Caixa",
-                "Delivery Direto Básico",
+                "2x Usuários",
                 "Relatório Básico",
                 "Relatório KDS",
                 "Importação de XML",
-                "2x Usuários",
                 "Delivery",
                 "Hub de Delivery",
+                "Estoque em Grade",
                 "Suporte Técnico - Via chamados",
                 "Notas Fiscais Ilimitadas"
             ],
@@ -362,7 +362,7 @@ const PLAN_DATA_FOOD = {
                 "Suporte Técnico - Via chat",
                 "Suporte Técnico - Estendido",
                 "Notas Fiscais Ilimitadas",
-                "Pedidos masketplace delivery mês",
+                "Pedidos Marketplace delivery mês",
                 "Estoque em Grade",
                 "1x PDV - Frente de Caixa"
             ],
@@ -464,9 +464,16 @@ const PLAN_DATA_FOOD = {
                 "Suporte Técnico - Via chamados",
                 "Suporte Técnico - Via chat",
                 "Suporte Técnico - Estendido",
-                "Pedidos masketplace delivery mês",
+                "Pedidos Marketplace delivery mês",
                 "Notas Fiscais Ilimitadas",
-                "1x PDV - Frente de Caixa"
+                "1x PDV - Frente de Caixa",
+                "Domínio próprio",
+                "E-mail Profissional",
+                "Entrega Fácil iFood",
+                "Gestão de entregadores",
+                "Gestão de redes sociais",
+                "Painel multilojas",
+                "Robô de WhatsApp"
             ],
             additionalUsers: {
                 count: 0,
@@ -528,9 +535,8 @@ const PLAN_DATA_FOOD = {
             baseUsers: 2,
             basePdvs: 1,
             fixedModules: [
-                "Pedidos masketplace delivery mês",
+                "500x Pedidos Marketplace delivery mês",
                 "1x PDV - Frente de Caixa",
-                "Delivery Direto Básico",
                 "Relatório Básico",
                 "Relatório KDS",
                 "Importação de XML",
@@ -612,7 +618,7 @@ const PLAN_DATA_FOOD = {
                 "Suporte Técnico - Via chat",
                 "Suporte Técnico - Estendido",
                 "Notas Fiscais Ilimitadas",
-                "Pedidos masketplace delivery mês",
+                "1500x Pedidos Marketplace delivery mês",
                 "3x PDV - Frente de Caixa",
                 "Estoque em Grade"
             ],
@@ -722,7 +728,7 @@ const PLAN_DATA_FOOD = {
                 "Suporte Técnico - Via chat",
                 "Suporte Técnico - Estendido",
                 "4x PDV - Frente de Caixa",
-                "Pedidos masketplace delivery mês",
+                "Pedidos Marketplace delivery mês",
                 "Notas Fiscais Ilimitadas"
             ],
             additionalUsers: {
