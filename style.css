@@ -1006,10 +1006,11 @@ body {
     margin-bottom: 0.5rem;
 }
 
-/* Summary Value */
+/* Summary Value — mantém "R$" e o valor na mesma linha */
 .summary-value {
     font-weight: 600;
     color: #1F2937;
+    white-space: nowrap;
 }
 
 /* Form Input */

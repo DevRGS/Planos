@@ -49,7 +49,7 @@
                         <label class="block text-sm font-medium text-gray-700 text-left mb-1">Desconto Manual (%)</label>
                         <input type="number" x-model.number="tempDiscountPercentage" x-ref="discountPercentageInput" placeholder="%" step="0.01" min="0" max="100" class="form-input text-center" @input="tempFinalValue = null">
                         <p class="text-xs text-gray-500 mt-1" x-show="!tempFinalValue || tempFinalValue === ''">
-                            Valor final calculado: <span class="font-semibold">R$ <span x-text="tempFinalTotal.toFixed(2).replace('.', ',')"></span></span>
+                            Valor final calculado: <span class="font-semibold whitespace-nowrap">R$ <span x-text="tempFinalTotal.toFixed(2).replace('.', ',')"></span></span>
                         </p>
                         <p class="text-xs text-gray-500 mt-1" x-show="tempFinalValue && tempFinalValue !== ''">
                             Ou defina o valor final abaixo
@@ -341,7 +341,7 @@
                                 <div class="flex items-center justify-between">
                                     <label>Usuários Adicionais (Base: <span x-text="selectedPlan.baseUsers"></span>, Máx. Adicional: <span x-text="selectedPlan.additionalUsers.max === Infinity ? '∞' : selectedPlan.additionalUsers.max"></span>)</label>
                                     <div class="flex items-center space-x-3">
-                                        <span class="text-sm font-semibold text-blue-600">+ R$ <span x-text="selectedPlan.additionalUsers.price.toFixed(2).replace('.', ',')"></span>/cada</span>
+                                        <span class="text-sm font-semibold text-blue-600 whitespace-nowrap">+ R$ <span x-text="selectedPlan.additionalUsers.price.toFixed(2).replace('.', ',')"></span>/cada</span>
                                         <input type="number" x-model.number="selectedPlan.additionalUsers.count" min="0" :max="selectedPlan.additionalUsers.max === Infinity ? null : selectedPlan.additionalUsers.max" class="w-20 text-center p-2 border rounded-lg">
                                     </div>
                                 </div>
@@ -350,7 +350,7 @@
                                 <div class="flex items-center justify-between">
                                      <label>PDVs Adicionais (Base: <span x-text="selectedPlan.basePdvs"></span>, Máx. Adicional: <span x-text="selectedPlan.additionalPdvs.max === Infinity ? '∞' : selectedPlan.additionalPdvs.max"></span>)</label>
                                     <div class="flex items-center space-x-3">
-                                        <span class="text-sm font-semibold text-blue-600">+ R$ <span x-text="selectedPlan.additionalPdvs.price.toFixed(2).replace('.', ',')"></span>/cada</span>
+                                        <span class="text-sm font-semibold text-blue-600 whitespace-nowrap">+ R$ <span x-text="selectedPlan.additionalPdvs.price.toFixed(2).replace('.', ',')"></span>/cada</span>
                                         <input type="number" x-model.number="selectedPlan.additionalPdvs.count" min="0" :max="selectedPlan.additionalPdvs.max === Infinity ? null : selectedPlan.additionalPdvs.max" class="w-20 text-center p-2 border rounded-lg">
                                     </div>
                                 </div>
@@ -366,7 +366,7 @@
                                         <span x-text="mod.name"></span>
                                     </span>
                                     <div @click.stop class="flex items-center space-x-3">
-                                        <span class="font-bold text-gray-800 text-sm">R$ <span x-text="mod.price.toFixed(2).replace('.', ',')"></span></span>
+                                        <span class="font-bold text-gray-800 text-sm whitespace-nowrap">R$ <span x-text="mod.price.toFixed(2).replace('.', ',')"></span></span>
                                         <template x-if="mod.quantifiable">
                                             <input type="number" x-model.number="mod.count" min="0" :max="mod.max === Infinity ? null : mod.max" class="w-20 text-center p-2 border border-gray-200 rounded-lg focus:border-blue-400 focus:ring-2 focus:ring-blue-100">
                                         </template>
@@ -410,17 +410,17 @@
                                     <span>Desconto comercial (<span x-text="effectiveManualDiscountPercent.toFixed(2).replace('.',',')"></span>%)</span>
                                     <button type="button" x-show="selectedPlan && (!selectedPlan.pricing || billingPeriod === 'anual')" @click="openDiscountModal()" class="text-xs text-blue-600 hover:underline">(Editar)</button>
                                 </div>
-                                <span>- R$ <span x-text="summary.calculatedDiscountAmount.toFixed(2).replace('.', ',')"></span></span>
+                                <span class="whitespace-nowrap shrink-0">- R$ <span x-text="summary.calculatedDiscountAmount.toFixed(2).replace('.', ',')"></span></span>
                             </div>
                             <p class="text-xs text-gray-600" x-show="selectedPlan && selectedPlan.pricing && billingPeriod === 'anual'">
-                                Economia total do desconto (plano + adicionais + opcionais, vs. tabela mensal): <strong>R$ <span x-text="summary.calculatedDiscountAmount.toFixed(2).replace('.', ',')"></span></strong>.
+                                Economia total do desconto (plano + adicionais + opcionais, vs. tabela mensal): <strong class="whitespace-nowrap">R$ <span x-text="summary.calculatedDiscountAmount.toFixed(2).replace('.', ',')"></span></strong>.
                             </p>
                         </div>
                         <p class="text-xs text-gray-500" x-show="selectedPlan && selectedPlan.pricing && billingPeriod === 'mensal'">No plano mensal não há desconto comercial percentual; o valor é o da tabela mensal.</p>
 
                         <div x-show="courtesyModuleName" class="flex justify-between text-blue-600" x-transition>
                             <span>Cortesia: <span x-text="courtesyModuleName"></span></span>
-                            <span>- R$ <span x-text="summary.courtesyValue.toFixed(2).replace('.',',')"></span></span>
+                            <span class="whitespace-nowrap shrink-0">- R$ <span x-text="summary.courtesyValue.toFixed(2).replace('.',',')"></span></span>
                         </div>
                         
                         <div class="pt-4 border-t">
@@ -435,15 +435,15 @@
                     <div x-show="summary.taxaAdesao > 0 || summary.setupCost > 0" class="mt-4 pt-4 border-t border-dashed border-gray-200 space-y-2 text-base">
                         <div x-show="summary.taxaAdesao > 0" class="flex justify-between text-amber-800">
                             <span>Taxa de adesão <span class="text-xs text-gray-500">(cobrança única)</span></span>
-                            <span class="font-semibold">R$ <span x-text="summary.taxaAdesao.toFixed(2).replace('.', ',')"></span></span>
+                            <span class="font-semibold whitespace-nowrap shrink-0">R$ <span x-text="summary.taxaAdesao.toFixed(2).replace('.', ',')"></span></span>
                         </div>
                         <div x-show="summary.setupCost > 0" class="flex justify-between text-orange-600">
                             <span>Setup de módulos <span class="text-xs text-gray-500">(1º mês)</span></span>
-                            <span class="font-semibold">R$ <span x-text="summary.setupCost.toFixed(2).replace('.', ',')"></span></span>
+                            <span class="font-semibold whitespace-nowrap shrink-0">R$ <span x-text="summary.setupCost.toFixed(2).replace('.', ',')"></span></span>
                         </div>
                         <div class="flex justify-between font-bold text-gray-800 pt-2">
                             <span>Total no 1º mês</span>
-                            <span>R$ <span x-text="summary.totalFirstMonth.toFixed(2).replace('.', ',')"></span></span>
+                            <span class="whitespace-nowrap shrink-0">R$ <span x-text="summary.totalFirstMonth.toFixed(2).replace('.', ',')"></span></span>
                         </div>
                     </div>
 
@@ -451,7 +451,7 @@
                         <p class="text-xs text-gray-500 mb-1 text-center">Total mensal recorrente (após desconto)</p>
                         <div class="flex justify-between items-center text-2xl font-extrabold text-gray-900 gap-2">
                             <span>TOTAL MENSAL </span>
-                            <span class="text-3xl text-blue-600 shrink-0">R$ <span x-text="summary.finalTotal.toFixed(2).replace('.', ',')"></span></span>
+                            <span class="text-3xl text-blue-600 shrink-0 whitespace-nowrap">R$ <span x-text="summary.finalTotal.toFixed(2).replace('.', ',')"></span></span>
                         </div>
                     </div>
 
@@ -469,7 +469,7 @@
                             <div x-show="!leadCaptureSuccess">
                                 <div class="p-4 bg-gray-100 border rounded-lg text-center mb-4">
                                     <p class="text-sm text-gray-700">Com esta condição, a economia em 12 meses será de:</p>
-                                    <p class="text-2xl font-bold text-green-600">R$ <span x-text="((summary.subtotal - summary.finalTotal) * 12).toFixed(2).replace('.',',')"></span></p>
+                                    <p class="text-2xl font-bold text-green-600"><span class="whitespace-nowrap">R$ <span x-text="((summary.subtotal - summary.finalTotal) * 12).toFixed(2).replace('.',',')"></span></span></p>
                                     <p class="text-xs text-gray-500 mt-2 flex items-center justify-center">
                                         <svg class="w-4 h-4 mr-1 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
                                         Compromisso de parceria de 12 meses para garantir seus benefícios.
@@ -492,7 +492,7 @@
                                 <div class="text-left mt-4 border-t border-green-200 pt-3 space-y-1">
                                     <p><strong>Cliente:</strong> <span x-text="clientName"></span></p>
                                     <p><strong>Cupom:</strong> <code class="font-mono bg-gray-200 text-gray-900 px-2 py-1 rounded-md" x-text="generatedCouponCode"></code></p>
-                                    <p><strong>Economia Anual:</strong> <strong class="text-green-900">R$ <span x-text="annualSavings.toFixed(2).replace('.',',')"></span></strong></p>
+                                    <p><strong>Economia Anual:</strong> <strong class="text-green-900 whitespace-nowrap">R$ <span x-text="annualSavings.toFixed(2).replace('.',',')"></span></strong></p>
                                     <div class="text-red-600"><strong>Expira em:</strong> <span x-text="countdownText"></span></div>
                                 </div>
                                 <button @click="generatePDF()" class="w-full mt-4 bg-gray-700 text-white font-bold py-2 rounded-lg hover:bg-gray-800 transition">
@@ -533,10 +533,10 @@
                         Desconto total em <span class="font-bold" x-text="selectedYears"></span> <span x-text="selectedYears === 1 ? 'ano' : 'anos'"></span>:
                     </p>
                     <p class="text-2xl font-extrabold text-green-600">
-                        R$ <span x-text="(summary.calculatedDiscountAmount * 12 * selectedYears).toFixed(2).replace('.', ',')"></span>
+                        <span class="whitespace-nowrap">R$ <span x-text="(summary.calculatedDiscountAmount * 12 * selectedYears).toFixed(2).replace('.', ',')"></span></span>
                     </p>
                     <p class="text-xs text-gray-500 mt-1">
-                        (Desconto mensal: R$ <span x-text="summary.calculatedDiscountAmount.toFixed(2).replace('.', ',')"></span>)
+                        <span class="whitespace-nowrap">(Desconto mensal: R$ <span x-text="summary.calculatedDiscountAmount.toFixed(2).replace('.', ',')"></span>)</span>
                     </p>
                 </div>
             </div>
