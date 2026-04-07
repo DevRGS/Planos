@@ -172,7 +172,7 @@ for (const [family, tier, apiName] of MAP_KEYS) {
     plan.basePrice = plan.pricing.mensal.preco;
   }
   plan.courtesyModules = COURTESY_MODULES_BY_PLAN[pk] ? [...COURTESY_MODULES_BY_PLAN[pk]] : [];
-  if ((family === 'delivery' || family === 'deliveryBalcao') && tier === 'basico') {
+  if (tier === 'basico' && (family === 'balcao' || family === 'delivery' || family === 'deliveryBalcao')) {
     plan.fixedModules = plan.fixedModules.filter((name) => name !== 'Delivery Direto Básico');
   }
   PLAN_DATA_FOOD[family][tier] = plan;
