@@ -22,6 +22,7 @@ export const PLAN_DATA_VAREJO = {
       'Suporte Técnico - Via Chamados',
       'Relatório Básico',
     ],
+    courtesyModules: [],
     additionalUsers: { count: 0, price: 19.9, max: 1 },
     additionalPdvs: { count: 0, price: 0, max: 0 },
     optionalModules: [
@@ -58,6 +59,7 @@ export const PLAN_DATA_VAREJO = {
       'Contratos de cartões e outros',
       'Promoções',
     ],
+    courtesyModules: [],
     additionalUsers: { count: 0, price: 19.9, max: 2 },
     additionalPdvs: { count: 0, price: 59.9, max: 2 },
     optionalModules: [
@@ -120,6 +122,7 @@ export const PLAN_DATA_VAREJO = {
       'Contratos de cartões e outros',
       'Suporte Técnico Completo (Todos os canais)',
     ],
+    courtesyModules: [],
     additionalUsers: { count: 0, price: 19.9, max: 5 },
     additionalPdvs: { count: 0, price: 59.9, max: 5 },
     optionalModules: [

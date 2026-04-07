@@ -35,12 +35,12 @@ const PLAN_DATA_FOOD = {
             basePdvs: 1,
             fixedModules: [
                 "1x PDV - Frente de Caixa",
-                "2x Usuários",
+                "Delivery Direto Básico",
                 "Relatório Básico",
                 "Relatório KDS",
                 "Importação de XML",
-                "Estoque em Grade",
                 "Controle de Mesas",
+                "2x Usuários",
                 "Suporte Técnico - Via chamados",
                 "Notas Fiscais Ilimitadas"
             ],
@@ -95,7 +95,10 @@ const PLAN_DATA_FOOD = {
                     preco: 199,
                     taxa_adesao: 0
                 }
-            }
+            },
+            courtesyModules: [
+                "1x Usuários Cortesia."
+            ]
         },
         gestao: {
             name: "Balcão Gestão",
@@ -192,7 +195,10 @@ const PLAN_DATA_FOOD = {
                     preco: 399,
                     taxa_adesao: 0
                 }
-            }
+            },
+            courtesyModules: [
+                "3x Usuários cortesia"
+            ]
         },
         avancado: {
             name: "Balcão Avançado",
@@ -285,7 +291,11 @@ const PLAN_DATA_FOOD = {
                     preco: 549,
                     taxa_adesao: 0
                 }
-            }
+            },
+            courtesyModules: [
+                "4x Usuários cortesia",
+                "4x Smart TEF Cortesia"
+            ]
         }
     },
     delivery: {
@@ -296,15 +306,14 @@ const PLAN_DATA_FOOD = {
             baseUsers: 2,
             basePdvs: 1,
             fixedModules: [
-                "Pedidos Marketplace delivery mês",
+                "500x Pedidos integrados Hub Delivery por mês",
                 "1x PDV - Frente de Caixa",
-                "2x Usuários",
                 "Relatório Básico",
                 "Relatório KDS",
                 "Importação de XML",
+                "2x Usuários",
                 "Delivery",
                 "Hub de Delivery",
-                "Estoque em Grade",
                 "Suporte Técnico - Via chamados",
                 "Notas Fiscais Ilimitadas"
             ],
@@ -338,7 +347,10 @@ const PLAN_DATA_FOOD = {
                     preco: 199,
                     taxa_adesao: 0
                 }
-            }
+            },
+            courtesyModules: [
+                "1x Usuários Cortesia."
+            ]
         },
         gestao: {
             name: "Delivery Gestão",
@@ -362,7 +374,7 @@ const PLAN_DATA_FOOD = {
                 "Suporte Técnico - Via chat",
                 "Suporte Técnico - Estendido",
                 "Notas Fiscais Ilimitadas",
-                "Pedidos Marketplace delivery mês",
+                "1500x Pedidos integrados Hub Delivery por mês",
                 "Estoque em Grade",
                 "1x PDV - Frente de Caixa"
             ],
@@ -433,7 +445,10 @@ const PLAN_DATA_FOOD = {
                     preco: 399,
                     taxa_adesao: 0
                 }
-            }
+            },
+            courtesyModules: [
+                "1x Usuários Cortesia."
+            ]
         },
         avancado: {
             name: "Delivery Avançado",
@@ -464,16 +479,9 @@ const PLAN_DATA_FOOD = {
                 "Suporte Técnico - Via chamados",
                 "Suporte Técnico - Via chat",
                 "Suporte Técnico - Estendido",
-                "Pedidos Marketplace delivery mês",
+                "3000x Pedidos integrados Hub Delivery por mês",
                 "Notas Fiscais Ilimitadas",
-                "1x PDV - Frente de Caixa",
-                "Domínio próprio",
-                "E-mail Profissional",
-                "Entrega Fácil iFood",
-                "Gestão de entregadores",
-                "Gestão de redes sociais",
-                "Painel multilojas",
-                "Robô de WhatsApp"
+                "1x PDV - Frente de Caixa"
             ],
             additionalUsers: {
                 count: 0,
@@ -524,7 +532,11 @@ const PLAN_DATA_FOOD = {
                     preco: 549,
                     taxa_adesao: 0
                 }
-            }
+            },
+            courtesyModules: [
+                "1x Usuários cortesia",
+                "1x Smart TEF Cortesia"
+            ]
         }
     },
     deliveryBalcao: {
@@ -535,7 +547,7 @@ const PLAN_DATA_FOOD = {
             baseUsers: 2,
             basePdvs: 1,
             fixedModules: [
-                "500x Pedidos Marketplace delivery mês",
+                "500x Pedidos integrados Hub Delivery por mês",
                 "1x PDV - Frente de Caixa",
                 "Relatório Básico",
                 "Relatório KDS",
@@ -590,7 +602,10 @@ const PLAN_DATA_FOOD = {
                     preco: 249,
                     taxa_adesao: 0
                 }
-            }
+            },
+            courtesyModules: [
+                "1x Usuários cortesia"
+            ]
         },
         gestao: {
             name: "Delivery & Balcão Gestão",
@@ -618,7 +633,7 @@ const PLAN_DATA_FOOD = {
                 "Suporte Técnico - Via chat",
                 "Suporte Técnico - Estendido",
                 "Notas Fiscais Ilimitadas",
-                "1500x Pedidos Marketplace delivery mês",
+                "1500x Pedidos integrados Hub Delivery por mês",
                 "3x PDV - Frente de Caixa",
                 "Estoque em Grade"
             ],
@@ -691,7 +706,10 @@ const PLAN_DATA_FOOD = {
                     preco: 499,
                     taxa_adesao: 0
                 }
-            }
+            },
+            courtesyModules: [
+                "3x Usuários cortesia"
+            ]
         },
         avancado: {
             name: "Delivery & Balcão Avançado",
@@ -728,7 +746,7 @@ const PLAN_DATA_FOOD = {
                 "Suporte Técnico - Via chat",
                 "Suporte Técnico - Estendido",
                 "4x PDV - Frente de Caixa",
-                "Pedidos Marketplace delivery mês",
+                "3000x Pedidos integrados Hub Delivery por mês",
                 "Notas Fiscais Ilimitadas"
             ],
             additionalUsers: {
@@ -788,7 +806,11 @@ const PLAN_DATA_FOOD = {
                     preco: 699,
                     taxa_adesao: 0
                 }
-            }
+            },
+            courtesyModules: [
+                "4x Usuários cortesia",
+                "4x Smart TEF Cortesia"
+            ]
         }
     },
     outros: {
@@ -883,7 +905,8 @@ const PLAN_DATA_FOOD = {
                     preco: 249,
                     taxa_adesao: 0
                 }
-            }
+            },
+            courtesyModules: []
         },
         autoatendimento: {
             name: "Plano Autoatendimento",
@@ -964,7 +987,8 @@ const PLAN_DATA_FOOD = {
                     preco: 299.25,
                     taxa_adesao: 0
                 }
-            }
+            },
+            courtesyModules: []
         }
     }
 };
@@ -993,6 +1017,7 @@ const PLAN_DATA_VAREJO = {
             "Suporte Técnico - Via Chamados",
             "Relatório Básico"
         ],
+        courtesyModules: [],
         additionalUsers: {
             count: 0,
             price: 19.9,
@@ -1086,6 +1111,7 @@ const PLAN_DATA_VAREJO = {
             "Contratos de cartões e outros",
             "Promoções"
         ],
+        courtesyModules: [],
         additionalUsers: {
             count: 0,
             price: 19.9,
@@ -1264,7 +1290,7 @@ const PLAN_DATA_VAREJO = {
         fixedModules: [
             "5x Usuários",
             "2x PDV - Frente de Caixa",
-            "2x Smart TEF",
+            "3x Smart TEF",
             "Produção",
             "Promoções",
             "Notas Fiscais Ilimitadas",
@@ -1285,6 +1311,7 @@ const PLAN_DATA_VAREJO = {
             "Contratos de cartões e outros",
             "Suporte Técnico Completo (Todos os canais)"
         ],
+        courtesyModules: [],
         additionalUsers: {
             count: 0,
             price: 19.9,

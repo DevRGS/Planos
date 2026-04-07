@@ -235,13 +235,26 @@
                             <h3 class="text-2xl font-bold text-gray-900 mb-3" x-text="plan.name"></h3>
                         <p class="text-sm text-gray-400 uppercase tracking-wide font-semibold mb-6 pb-4 border-b border-gray-100">Módulos inclusos</p>
                         <ul class="space-y-3 text-gray-900 flex-grow text-sm">
-                            <template x-for="item in sortModuleNames(plan.fixedModules)" :key="item">
+                            <template x-for="item in sortCardModuleNames(plan.fixedModules)" :key="item">
                                 <li class="flex items-start">
                                     <svg class="w-5 h-5 text-emerald-500 mr-3 flex-shrink-0 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>
                                     <span class="leading-relaxed" x-text="item"></span>
                                 </li>
                             </template>
                         </ul>
+                        <template x-if="plan.courtesyModules && plan.courtesyModules.length">
+                            <div class="mt-5 pt-4 border-t border-amber-100">
+                                <p class="text-xs font-semibold uppercase tracking-wide text-amber-800 mb-3">Cortesia</p>
+                                <ul class="space-y-2 text-sm text-amber-950">
+                                    <template x-for="c in plan.courtesyModules" :key="c">
+                                        <li class="flex items-start">
+                                            <svg class="w-5 h-5 text-amber-500 mr-3 flex-shrink-0 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>
+                                            <span class="leading-relaxed" x-text="c"></span>
+                                        </li>
+                                    </template>
+                                </ul>
+                            </div>
+                        </template>
                         </div>
                     </div>
                 </template>
@@ -267,13 +280,26 @@
                             <h3 class="text-2xl font-bold text-gray-900 mb-3" x-text="planData.varejo[opt.id].name"></h3>
                         <p class="text-sm text-gray-400 uppercase tracking-wide font-semibold mb-6 pb-4 border-b border-gray-100">Módulos inclusos</p>
                         <ul class="space-y-3 text-gray-900 flex-grow text-sm">
-                            <template x-for="item in sortModuleNames(planData.varejo[opt.id].fixedModules)" :key="item">
+                            <template x-for="item in sortCardModuleNames(planData.varejo[opt.id].fixedModules)" :key="item">
                                 <li class="flex items-start">
                                     <svg class="w-5 h-5 text-emerald-500 mr-3 flex-shrink-0 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>
                                     <span class="leading-relaxed" x-text="item"></span>
                                 </li>
                             </template>
                         </ul>
+                        <template x-if="planData.varejo[opt.id].courtesyModules && planData.varejo[opt.id].courtesyModules.length">
+                            <div class="mt-5 pt-4 border-t border-amber-100">
+                                <p class="text-xs font-semibold uppercase tracking-wide text-amber-800 mb-3">Cortesia</p>
+                                <ul class="space-y-2 text-sm text-amber-950">
+                                    <template x-for="c in planData.varejo[opt.id].courtesyModules" :key="c">
+                                        <li class="flex items-start">
+                                            <svg class="w-5 h-5 text-amber-500 mr-3 flex-shrink-0 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>
+                                            <span class="leading-relaxed" x-text="c"></span>
+                                        </li>
+                                    </template>
+                                </ul>
+                            </div>
+                        </template>
                         </div>
                     </div>
                 </template>
@@ -299,13 +325,26 @@
                             <h3 class="text-2xl font-bold text-gray-900 mb-3" x-text="planData.food.outros[opt.id].name"></h3>
                         <p class="text-sm text-gray-400 uppercase tracking-wide font-semibold mb-6 pb-4 border-b border-gray-100">Módulos inclusos</p>
                         <ul class="space-y-3 text-gray-900 flex-grow text-sm">
-                            <template x-for="item in sortModuleNames(planData.food.outros[opt.id].fixedModules)" :key="item">
+                            <template x-for="item in sortCardModuleNames(planData.food.outros[opt.id].fixedModules)" :key="item">
                                 <li class="flex items-start">
                                     <svg class="w-5 h-5 text-emerald-500 mr-3 flex-shrink-0 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>
                                     <span class="leading-relaxed" x-text="item"></span>
                                 </li>
                             </template>
                         </ul>
+                        <template x-if="planData.food.outros[opt.id].courtesyModules && planData.food.outros[opt.id].courtesyModules.length">
+                            <div class="mt-5 pt-4 border-t border-amber-100">
+                                <p class="text-xs font-semibold uppercase tracking-wide text-amber-800 mb-3">Cortesia</p>
+                                <ul class="space-y-2 text-sm text-amber-950">
+                                    <template x-for="c in planData.food.outros[opt.id].courtesyModules" :key="c">
+                                        <li class="flex items-start">
+                                            <svg class="w-5 h-5 text-amber-500 mr-3 flex-shrink-0 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>
+                                            <span class="leading-relaxed" x-text="c"></span>
+                                        </li>
+                                    </template>
+                                </ul>
+                            </div>
+                        </template>
                         </div>
                     </div>
                 </template>

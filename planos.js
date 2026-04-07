@@ -284,6 +284,28 @@ function quoteCalculator() {
             return [...list].sort((a, b) => String(a).localeCompare(String(b), 'pt-BR', { sensitivity: 'base' }));
         },
 
+        /**
+         * Cards / PDF: primeiro pedidos integrados Hub, depois PDV, depois linha de Usuários (não cortesia);
+         * demais módulos em ordem alfabética.
+         */
+        sortCardModuleNames(list) {
+            if (!list || !list.length) return [];
+            const band = (s) => {
+                const t = String(s);
+                if (/^\d+\s*x\s+Pedidos/i.test(t) || /Pedidos integrados Hub Delivery/i.test(t) || /Pedidos Marketplace delivery/i.test(t)) {
+                    return 0;
+                }
+                if (t.includes('PDV - Frente de Caixa')) return 1;
+                if (/^\d+\s*x\s+Usuários/i.test(t) && !/cortesia/i.test(t)) return 2;
+                return 3;
+            };
+            return [...list].sort((a, b) => {
+                const d = band(a) - band(b);
+                if (d !== 0) return d;
+                return String(a).localeCompare(String(b), 'pt-BR', { sensitivity: 'base' });
+            });
+        },
+
         login() { if (this.password) { this.loggedIn = true; this.loginError = false; } else { this.loginError = true; } },
         
         resetAllPlanInstances() {
@@ -1162,7 +1184,7 @@ function quoteCalculator() {
             const availableWidthMod = PAGE_WIDTH - MARGIN * 2;
             const columnWMod = (availableWidthMod - COLUMN_GAP_MOD) / COLUMN_COUNT_MOD;
 
-            const fixedModulesList = this.sortModuleNames(this.selectedPlan.fixedModules);
+            const fixedModulesList = this.sortCardModuleNames(this.selectedPlan.fixedModules);
             const itemsColuna1 = fixedModulesList.slice(0, MAX_ITENS_COLUNA_1);
             const itemsColuna2 = fixedModulesList.slice(MAX_ITENS_COLUNA_1);
 
@@ -1194,6 +1216,29 @@ function quoteCalculator() {
             }
 
             y = maxY + 5;
+
+            const courtesyPdf = this.selectedPlan.courtesyModules && this.selectedPlan.courtesyModules.length > 0
+                ? this.selectedPlan.courtesyModules
+                : [];
+            if (courtesyPdf.length > 0) {
+                await checkPageBreak(8 + courtesyPdf.length * 5);
+                doc.setFontSize(10);
+                doc.setFont(FONT_BOLD, 'bold');
+                const darkCourtesy = hexToRgb(DARK_GRAY);
+                if (darkCourtesy) doc.setTextColor(darkCourtesy.r, darkCourtesy.g, darkCourtesy.b);
+                doc.text('Cortesia do plano:', MARGIN, y);
+                y += 5;
+                doc.setFont(FONT_REGULAR, 'normal');
+                const medCourtesy = hexToRgb(MEDIUM_GRAY);
+                if (medCourtesy) doc.setTextColor(medCourtesy.r, medCourtesy.g, medCourtesy.b);
+                for (const item of courtesyPdf) {
+                    await checkPageBreak(5);
+                    const linesC = doc.splitTextToSize(`• ${item}`, PAGE_WIDTH - MARGIN * 2 - 10);
+                    doc.text(linesC, MARGIN + 5, y);
+                    y += linesC.length * 4.5;
+                }
+                y += 5;
+            }
 
             if (this.selectedPlan.additionalUsers.count > 0 || this.selectedPlan.additionalPdvs.count > 0) {
                 await checkPageBreak(30);

@@ -79,6 +79,29 @@ function buildOptional(m) {
   return rec;
 }
 
+/** Limite mensal — API: sub_type delivery_integration_orders + amount */
+function labelPedidosMarketplaceDelivery(amount) {
+  const n = amount == null ? NaN : Number(amount);
+  const base = 'Pedidos integrados Hub Delivery por mês';
+  if (Number.isFinite(n) && n > 0) {
+    return `${n}x ${base}`;
+  }
+  return base;
+}
+
+/** Cortesias comerciais por plano Food (exibição nos cards). */
+const COURTESY_MODULES_BY_PLAN = {
+  'balcao:basico': ['1x Usuários Cortesia.'],
+  'balcao:gestao': ['3x Usuários cortesia'],
+  'balcao:avancado': ['4x Usuários cortesia', '4x Smart TEF Cortesia'],
+  'delivery:basico': ['1x Usuários Cortesia.'],
+  'delivery:gestao': ['1x Usuários Cortesia.'],
+  'delivery:avancado': ['1x Usuários cortesia', '1x Smart TEF Cortesia'],
+  'deliveryBalcao:basico': ['1x Usuários cortesia'],
+  'deliveryBalcao:gestao': ['3x Usuários cortesia'],
+  'deliveryBalcao:avancado': ['4x Usuários cortesia', '4x Smart TEF Cortesia'],
+};
+
 function buildPlan(planObj) {
   const users = planObj.modules.find((x) => x.module.type === 'users');
   const pdv = planObj.modules.find((x) => x.module.name === 'PDV - Frente de Caixa');
@@ -93,6 +116,10 @@ function buildPlan(planObj) {
     }
     if (nm === 'PDV - Frente de Caixa') {
       fixedModules.push(`${m.amount}x ${nm}`);
+      continue;
+    }
+    if (m.module.sub_type === 'delivery_integration_orders') {
+      fixedModules.push(labelPedidosMarketplaceDelivery(m.amount));
       continue;
     }
     fixedModules.push(nm);
@@ -144,6 +171,10 @@ for (const [family, tier, apiName] of MAP_KEYS) {
     plan.pricing = PRICING_TABLE[pk];
     plan.basePrice = plan.pricing.mensal.preco;
   }
+  plan.courtesyModules = COURTESY_MODULES_BY_PLAN[pk] ? [...COURTESY_MODULES_BY_PLAN[pk]] : [];
+  if ((family === 'delivery' || family === 'deliveryBalcao') && tier === 'basico') {
+    plan.fixedModules = plan.fixedModules.filter((name) => name !== 'Delivery Direto Básico');
+  }
   PLAN_DATA_FOOD[family][tier] = plan;
 }
 
@@ -171,6 +202,7 @@ for (const on of outrosNames) {
       taxa_adesao: 0,
     },
   };
+  plan.courtesyModules = [];
   PLAN_DATA_FOOD.outros[key] = plan;
 }
 
