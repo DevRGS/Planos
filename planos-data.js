@@ -949,6 +949,12 @@ const PLAN_DATA_FOOD = {
             },
             optionalModules: [
                 {
+                    name: "Autoatendimento",
+                    price: 299,
+                    quantifiable: true,
+                    count: 0
+                },
+                {
                     name: "Produção",
                     price: 30,
                     quantifiable: false,
